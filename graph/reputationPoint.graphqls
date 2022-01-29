@@ -1,0 +1,6 @@
+type ReputationPoint{
+    id: Int!
+    startPoint: Int!
+    endPoint: Int!
+    badges: String!
+}

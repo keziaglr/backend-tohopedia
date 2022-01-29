@@ -1,0 +1,6 @@
+type ShippingVendor{
+    id: Int!
+    name: String!
+    deliveryTime: Int!
+    price: Int!
+}

@@ -1,0 +1,15 @@
+type Shop{
+    id: Int!
+    name: String!
+    nameSlug: String!
+    points: Int!
+    image: String!
+    operationalStatus: String!
+    operationalHour: String!
+    description: String!
+    slogan: String!
+    address: String!
+    
+    ReputationPoint: ReputationPoint!
+    ShippingVendor: [ShippingVendor!]!
+}
