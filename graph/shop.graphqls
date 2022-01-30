@@ -1,5 +1,6 @@
 type Shop{
     id: Int!
+    user_id: Int!
     name: String!
     nameSlug: String!
     points: Int!
@@ -9,7 +10,44 @@ type Shop{
     description: String!
     slogan: String!
     address: String!
+    phoneNumber: String!
     
-    ReputationPoint: ReputationPoint!
-    ShippingVendor: [ShippingVendor!]!
+    badges_id: Int!
+    badges: Badges!
+    product: [Product]
+    user: User!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!
+}
+
+type ShopShippingVendor{
+    shop_id: Int!
+    vendor_id: Int!
+
+    shop: Shop!
+    vendor: ShippingVendor!
+}
+
+input CreateShop{
+    phoneNumber: String!
+    name: String!
+    nameSlug: String!
+    address: String!
+}
+
+input UpdateShop{
+    profilePicture: String!
+    name: String!
+    nameSlug: String!
+    slogan: String!
+    description: String!
+    operationalHour: String!
+    operationalStatus: String!
+}
+
+extend type Mutation{
+    createShop(input: CreateShop!): Shop!
+    updateShop(id: Int!, input: UpdateShop!): Shop!
 }

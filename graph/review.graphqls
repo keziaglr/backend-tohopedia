@@ -1,0 +1,31 @@
+type Review{
+    id: Int!
+    user_id: Int!
+    product_id: Int!
+    score: Int!
+    description: String!
+    image: String
+    status: String!
+
+    user: User!
+    product: Product!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!    
+}
+
+type ReviewReply{
+    id: Int!
+    review_id: Int!
+    source_id: Int!
+
+    role: String!
+    messsage: String!
+
+    review: Review!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!  
+}

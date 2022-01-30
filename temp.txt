@@ -5,14 +5,13 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/keziaglr/backend-tohopedia/graph/generated"
 	"github.com/keziaglr/backend-tohopedia/graph/model"
 )
 
-func (r *mutationResolver) CreateUser(ctx context.Context, input model.AuthUser) (*model.User, error) {
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.RegisterUser) (*model.User, error) {
 	var otp model.Otp
 	r.DB.Debug().First(&otp, "code=?", input.OtpCode)
 
@@ -28,8 +27,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.AuthUser)
 	r.DB.Delete(&otp, "code=?", input.OtpCode)
 
 	user := model.User{
-		Email:    input.Email,
-		Password: input.Password,
+		Email: input.Email,
 	}
 
 	r.DB.Create(&user)
@@ -49,33 +47,15 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id int, input model.U
 	return &updatedUser, nil
 }
 
-func (r *mutationResolver) ResetPassword(ctx context.Context, id int, password string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var users []*model.User
 	r.DB.Where("role = ?", "user").Find(&users)
 	return users, nil
 }
 
-func (r *queryResolver) GetUserByEmailPass(ctx context.Context, email string, password string) (*model.User, error) {
+func (r *queryResolver) GetUserAuth(ctx context.Context, email string, password string) (*model.User, error) {
 	var user *model.User
 	r.DB.Where("email = ? AND password = ?", email, password).First(&user)
-
-	if user == nil {
-		return nil, nil
-	}
-	return user, nil
-}
-
-func (r *queryResolver) GetUserAuth(ctx context.Context, input model.AuthUser) (*model.User, error) {
-	var user *model.User
-	r.DB.Where("email = ? AND password = ?", input.Email, input.Password).First(&user)
-
-	if user == nil {
-		return nil, nil
-	}
 
 	var otp model.Otp
 	r.DB.Debug().First(&otp, "code=?", input.OtpCode)
@@ -90,20 +70,6 @@ func (r *queryResolver) GetUserAuth(ctx context.Context, input model.AuthUser) (
 	}
 
 	r.DB.Delete(&otp, "code=?", input.OtpCode)
-
-	return user, nil
-}
-
-func (r *queryResolver) GetUserByID(ctx context.Context, id int) (*model.User, error) {
-	var user *model.User
-	r.DB.Where("id = ?", id).First(&user)
-
-	return user, nil
-}
-
-func (r *queryResolver) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
-	var user *model.User
-	r.DB.Where("email = ?", email).First(&user)
 
 	return user, nil
 }

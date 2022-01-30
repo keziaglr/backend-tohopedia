@@ -1,0 +1,29 @@
+scalar Time
+type Chat{
+    id: Int!
+    shop_id: Int!
+    user_id: Int!
+
+    shop: Shop!
+    user: User!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!
+}
+
+type ChatDetail{
+    chat_id: Int!
+    source_id: Int!
+
+    chat: Chat!
+    role: String!
+
+    message: String
+    image: String
+    type: String!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!
+}

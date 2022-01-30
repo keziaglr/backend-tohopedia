@@ -1,0 +1,12 @@
+type Category{
+    id: Int!
+    name: String!
+}
+
+type SubCategory{
+    id: Int!
+    category_id: Int!
+    name: String!
+
+    category: Category!
+}

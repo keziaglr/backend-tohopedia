@@ -2,9 +2,27 @@
 
 package model
 
-type RegisterUser struct {
+type AuthUser struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	OtpCode  string `json:"otpCode"`
+}
+
+type CreateShop struct {
+	PhoneNumber string `json:"phoneNumber"`
+	Name        string `json:"name"`
+	NameSlug    string `json:"nameSlug"`
+	Address     string `json:"address"`
+}
+
+type UpdateShop struct {
+	ProfilePicture    string `json:"profilePicture"`
+	Name              string `json:"name"`
+	NameSlug          string `json:"nameSlug"`
+	Slogan            string `json:"slogan"`
+	Description       string `json:"description"`
+	OperationalHour   string `json:"operationalHour"`
+	OperationalStatus string `json:"operationalStatus"`
 }
 
 type UpdateUser struct {
@@ -14,16 +32,4 @@ type UpdateUser struct {
 	Gender         string `json:"gender"`
 	Email          string `json:"email"`
 	PhoneNumber    string `json:"phoneNumber"`
-}
-
-type User struct {
-	ID             int    `json:"id"`
-	Name           string `json:"name"`
-	Email          string `json:"email"`
-	Password       string `json:"password"`
-	Dob            string `json:"dob"`
-	Gender         string `json:"gender"`
-	PhoneNumber    string `json:"phoneNumber"`
-	ProfilePicture string `json:"profilePicture"`
-	IsSuspend      bool   `json:"isSuspend"`
 }

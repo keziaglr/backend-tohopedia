@@ -1,0 +1,35 @@
+type TransactionHeader{
+    id: Int!
+    user_id: Int!
+    transactionType: String!
+    transactionDate: Date!
+    status: String!
+    invoiceNumber: String!
+    paymentMethod: String!
+    shippingAddress: String!
+    paymentDiscount: Int!
+
+    shipping_id: Int!
+    shippingVendor: ShippingVendor!
+    user: User!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!
+}
+
+type TransactionDetail{
+    id: Int!
+    transaction_id: Int!
+    product_id: Int!
+    voucher_id: Int!
+    qty: Int!
+    
+    transaction: TransactionHeader!
+    product: Product!
+    voucher: Voucher!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!
+}

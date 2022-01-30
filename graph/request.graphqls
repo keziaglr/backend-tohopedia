@@ -1,0 +1,11 @@
+type Request {
+    id: Int!
+    user_id: Int!
+    status: String!
+
+    user: User!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!
+}

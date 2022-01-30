@@ -1,0 +1,29 @@
+type Discussion{
+    id: Int!
+    user_id: Int!
+    product_id: Int!
+    content: String!
+    description: String!
+
+    user: User!
+    product: Product!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!    
+}
+
+type DiscussionReply{
+    id: Int!
+    discussion_id: Int!
+    source_id: Int!
+
+    role: String!
+    messsage: String!
+
+    discussion: Discussion!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!  
+}

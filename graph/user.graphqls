@@ -13,16 +13,18 @@ type User {
     shippingAddress: String!
     role: String!
 
-    Shop: Shop!
-    Transactions: [TransactionHeader!]!
-    Cart: [Cart!]!
-    Voucher: [Voucher!]!
-    Wishlist: [Product!]!
+    voucher: [Voucher!]!
+    wishlist: [Product!]!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!
 }
 
-input RegisterUser {
+input AuthUser {
     email: String!
     password: String!
+    otpCode: String!
 }
 
 input UpdateUser{
@@ -36,10 +38,14 @@ input UpdateUser{
 
 type Query {
     users: [User!]!
-    getUserAuth(email: String!, password: String!): User!
+    getUserByEmailPass(email: String!, password: String!): User!
+    getUserAuth(input: AuthUser!): User!
+    getUserByID(id: Int!): User!
+    getUserByEmail(email: String!): User!
 }
 
 type Mutation {
-    createUser(input: RegisterUser!): User!
+    createUser(input: AuthUser!): User!
     updateUser(id: Int!, input: UpdateUser!): User!
+    resetPassword(id: Int!, password: String!): User!
 }

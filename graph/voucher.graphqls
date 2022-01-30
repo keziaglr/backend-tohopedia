@@ -1,0 +1,9 @@
+type Voucher{
+    id: Int!
+    name: String!
+    description: String!
+    discountRate: Int!
+    tnc: String!
+    startTime: Time!
+    endTime: Time!
+}

@@ -1,4 +1,27 @@
 type Product{
     id: Int!
-    name: String
+    name: String!
+    description: String!
+    price: Int!
+    discount: Int!
+    metaData: String!
+    addedTime: Time!
+    stock: Int!
+    rating: Int!
+    
+    sub_category_id: Int!
+
+    sub_category: SubCategory!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!
+}
+
+type ProductImage{
+    id: Int!
+    product_id: Int!
+    url: String!
+
+    product: Product!
 }

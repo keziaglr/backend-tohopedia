@@ -1,0 +1,13 @@
+type Cart{
+    id: Int!
+    user_id: Int!
+    product_id: Int!
+    qty: Int!
+
+    product: Product!
+    user: User!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!
+}
