@@ -1,0 +1,8 @@
+type Campaign{
+    id: Int!
+    url: String!
+}
+
+extend type Query {
+    campaigns: [Campaign!]!
+}

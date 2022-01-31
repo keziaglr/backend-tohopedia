@@ -46,6 +46,7 @@ type Query {
 
 type Mutation {
     createUser(input: AuthUser!): User!
+    authUser(input: AuthUser!): User!
     updateUser(id: Int!, input: UpdateUser!): User!
-    resetPassword(id: Int!, password: String!): User!
+    resetPassword(input: AuthUser!): User!
 }

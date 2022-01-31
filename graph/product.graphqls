@@ -10,8 +10,8 @@ type Product{
     rating: Int!
     
     sub_category_id: Int!
-
     sub_category: SubCategory!
+    images: [ProductImage!]!
 
     createdAt: Time!
     updatedAt: Time!
@@ -20,8 +20,16 @@ type Product{
 
 type ProductImage{
     id: Int!
-    product_id: Int!
     url: String!
+}
 
-    product: Product!
+extend type Query{
+    products: [Product!]!
+    getProductById(id: Int!): Product!
+    getProductsByShop(shopID: Int!): [Product!]!
+    getProductsTopDisc: [Product!]!
+    getProductsByCategories(categoryId: Int!): [Product!]!
+    getProductsSearch(search: String!): [Product!]!
+    getProductOrder(by: String!, order:String!): [Product!]!
+    getProductFilter(by: String!, value: String!): [Product!]!
 }

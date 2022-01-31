@@ -67,6 +67,7 @@ func migrate(){
 	db.Exec("DROP TABLE product_images, shop_product, user_wishlist, user_voucher")
 	
 	db.Migrator().DropTable(
+		&model.Campaign{},
 		&model.ShippingVendor{},
 		&model.Badges{},  
 		&model.Voucher{},
@@ -92,6 +93,7 @@ func migrate(){
 	)
 	
 	db.AutoMigrate(
+		&model.Campaign{},
 		&model.ShippingVendor{},
 		&model.Badges{},  
 		&model.Voucher{},
@@ -363,6 +365,13 @@ func seedMaster() {
 					Stock: 10000,
 					Rating: 5,
 					SubCategoryID:6,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://static.bmdstatic.com/pk/product/medium/600fc3d770293.jpg",
+						},{
+							URL: "https://cdn.medcom.id/images/content/2022/01/25/1381007/pKZzQ6uyCr.jpg",
+						},
+					},
 				},{
 					Name: "IPhone 13",
 					Description: "IPhone 13 Description",
@@ -373,6 +382,13 @@ func seedMaster() {
 					Stock: 200000,
 					Rating: 4,
 					SubCategoryID:5,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://www.notebookcheck.net/fileadmin/Notebooks/News/_nc3/iphone_12_pro_iphone_12_iphone_11_battery_life.jpg",
+						},{
+							URL: "https://cdn.lumen.id/commerce/digimap/file/a4aa2367-2527-4a98-9b61-2db0468ba61c/PDP-iPhone-13-Pink-4-medium.jpeg",
+						},
+					},
 				},{
 					Name: "IPhone 12",
 					Description: "IPhone 12 Description",
@@ -383,6 +399,13 @@ func seedMaster() {
 					Stock: 200000,
 					Rating: 5,
 					SubCategoryID:5,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//99/MTA-8107982/apple_iphone_11_64gb_full01_ge72ewvv.jpg",
+						},{
+							URL: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/refurb-iphone-11-pro-gold-2019?wid=2000&hei=2000&fmt=jpeg&qlt=80&.v=1611101491000",
+						},
+					},
 				},{
 					Name: "IPhone 11",
 					Description: "IPhone 11 Description",
@@ -393,6 +416,13 @@ func seedMaster() {
 					Stock: 50000,
 					Rating: 4,
 					SubCategoryID:5,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//96/MTA-3567047/apple_apple-iphone-x-64-gb-smartphone_full05.jpg",
+						},{
+							URL: "https://images.tokopedia.net/img/cache/500-square/product-1/2019/5/3/60479447/60479447_b59bd146-2fd3-4c6c-80fe-0fc18fae89fb_529_529",
+						},
+					},
 				},{
 					Name: "IPhone X",
 					Description: "IPhone X Description",
@@ -403,6 +433,13 @@ func seedMaster() {
 					Stock: 70000,
 					Rating: 5,
 					SubCategoryID:5,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://id-live-05.slatic.net/original/35fd56ea9616f0353f925169c8950e96.jpg_720x720q80.jpg_.webp",
+						},{
+							URL: "https://id-live-05.slatic.net/p/ea1b93cbd237ecef42d4b90978134b38.jpg_720x720q80.jpg_.webp",
+						},
+					},
 				},{
 					Name: "IPhone 8",
 					Description: "IPhone 8 Description",
@@ -413,6 +450,13 @@ func seedMaster() {
 					Stock: 80000,
 					Rating: 4,
 					SubCategoryID:5,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://cdn.alloallo.media/catalog/product/apple/iphone/iphone-7/iphone-7-black.jpg",
+						},{
+							URL: "https://jualku.com/wp-content/uploads/2019/05/apple-iphone-7-2.jpg",
+						},
+					},
 				},{
 					Name: "IPhone 7",
 					Description: "IPhone 7 Description",
@@ -423,6 +467,13 @@ func seedMaster() {
 					Stock: 70000,
 					Rating: 5,
 					SubCategoryID:5,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://support.apple.com/library/APPLE/APPLECARE_ALLGEOS/SP705/SP705-iphone_6-mul.png",
+						},{
+							URL: "https://m.media-amazon.com/images/I/51+K8pddvbS._AC_SX679_.jpg",
+						},
+					},
 				},{
 					Name: "IPhone 6",
 					Description: "IPhone 6 Description",
@@ -433,6 +484,13 @@ func seedMaster() {
 					Stock: 60000,
 					Rating: 5,
 					SubCategoryID:5,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://d2xjmi1k71iy2m.cloudfront.net/dairyfarm/id/images/185/0818587_PE774509_S4.jpg",
+						},{
+							URL: "https://d2xjmi1k71iy2m.cloudfront.net/dairyfarm/id/images/386/0938667_PE794238_S5.jpg",
+						},
+					},
 				},{
 					Name: "MacBook Air",
 					Description: "MacBook Air Description",
@@ -443,6 +501,13 @@ func seedMaster() {
 					Stock: 60000,
 					Rating: 5,
 					SubCategoryID:6,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://static.bmdstatic.com/pk/product/large/6007d8624ea91.jpg",
+						},{
+							URL: "https://store.stormfront.co.uk/content/images/thumbs/0014007_macbook_air_blush_pdp_image_position-2_m1_chip_usenjpg.jpeg",
+						},
+					},
 				},
 			},
 		},{
@@ -469,6 +534,13 @@ func seedMaster() {
 					Stock: 30000,
 					Rating: 3,
 					SubCategoryID:1,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://d2xjmi1k71iy2m.cloudfront.net/dairyfarm/id/images/185/0818587_PE774509_S4.jpg",
+						},{
+							URL: "https://d2xjmi1k71iy2m.cloudfront.net/dairyfarm/id/images/386/0938667_PE794238_S5.jpg",
+						},
+					},
 				},{
 					Name: "Dining Table",
 					Description: "Dining Table Description",
@@ -479,6 +551,13 @@ func seedMaster() {
 					Stock: 250000,
 					Rating: 4,
 					SubCategoryID:2,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://www.ikea.com/us/en/images/products/vedbo-dining-table-black__0815091_pe772752_s5.jpg?f=s",
+						},{
+							URL: "https://www.ikea.com/us/en/images/products/vedbo-dining-table-black__0766049_pe753697_s5.jpg?f=s",
+						},
+					},
 				}, {
 					Name: "Dining Chair",
 					Description: "Dining Chair Description",
@@ -489,6 +568,13 @@ func seedMaster() {
 					Stock: 5000,
 					Rating: 3,
 					SubCategoryID:1,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://cdn.shopify.com/s/files/1/2350/5189/products/Costa_dining_chair_side_new_800x.jpg?v=1580267464",
+						},{
+							URL: "https://cdn.shopify.com/s/files/1/2350/5189/products/Costa_dining_chair_new.jpg?v=1580267381",
+						},
+					},
 				}, {
 					Name: "Cafe Table",
 					Description: "Cafe Table Description",
@@ -499,6 +585,13 @@ func seedMaster() {
 					Stock: 250000,
 					Rating: 4,
 					SubCategoryID:2,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://media.fds.fi/product_image/800/409Muuto_AK.jpg",
+						},{
+							URL: "https://homeexporter.com/wp-content/uploads/2021/06/cafe-table-500x500-1.jpg",
+						},
+					},
 				},				{
 					Name: "Kids Chair",
 					Description: "Kids Chair Description",
@@ -509,6 +602,13 @@ func seedMaster() {
 					Stock: 4000,
 					Rating: 5,
 					SubCategoryID:1,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://i5.walmartimages.com/asr/f25bcbd9-edb2-497a-8349-33e4149fe92f_1.11b6a37662cf1e9353b51b11eb49e478.jpeg?odnHeight=612&odnWidth=612&odnBg=FFFFFF",
+						},{
+							URL: "https://m.media-amazon.com/images/I/71bIrPF9ZOL._SX569_.jpg",
+						},
+					},
 				},{
 					Name: "Kids Table",
 					Description: "Kids Table Description",
@@ -519,6 +619,13 @@ func seedMaster() {
 					Stock: 250000,
 					Rating: 5,
 					SubCategoryID:2,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://www.ikea.com/us/en/images/products/mammut-childrens-table-indoor-outdoor-blue__0735844_pe740211_s5.jpg?f=xs",
+						},{
+							URL: "https://www.ikea.com/us/en/images/products/mammut-childrens-table-indoor-outdoor-red__0735839_pe740209_s5.jpg?f=xs",
+						},
+					},
 				},
 			},
 		},{
@@ -545,6 +652,13 @@ func seedMaster() {
 					Stock: 10000,
 					Rating: 5,
 					SubCategoryID:13,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://cf.shopee.co.id/file/b912a4e15491159e041507b0e2b7bfec",
+						},{
+							URL: "https://cf.shopee.co.id/file/e0752cfa1502d57d63ff78e7c2b0fb0a",
+						},
+					},
 				},{
 					Name: "Shower Scrub",
 					Description: "Shower Scrub Description",
@@ -555,6 +669,13 @@ func seedMaster() {
 					Stock: 200000,
 					Rating: 4,
 					SubCategoryID:13,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://cf.shopee.co.id/file/279200f78807db8d820adee6f77fc54c",
+						},{
+							URL: "https://image.femaledaily.com/dyn/640/images/prod-pics/product_1603968990_Scarlett_800x800.jpg",
+						},
+					},
 				},{
 					Name: "Body Lotion",
 					Description: "Body Lotion Description",
@@ -565,6 +686,13 @@ func seedMaster() {
 					Stock: 200000,
 					Rating: 5,
 					SubCategoryID:13,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://id-live-05.slatic.net/shop/0b6ac54b74ae246ecdd4a28cbb4737fd.jpeg_2200x2200q80.jpg_.webp",
+						},{
+							URL: "https://cf.shopee.co.id/file/3adee1925031b6735c47e38aa10a1dba",
+						},
+					},
 				},{
 					Name: "Hair Serum",
 					Description: "Hair Serum Description",
@@ -575,6 +703,13 @@ func seedMaster() {
 					Stock: 50000,
 					Rating: 4,
 					SubCategoryID:14,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://cdn.idntimes.com/content-images/post/20211112/51ptxufjil-sl1080-2ad592db4fb55187edca9d98c4f61fe1.jpg",
+						},{
+							URL: "https://cf.shopee.co.id/file/17505480c80c7745ea106a2da2fd84d7",
+						},
+					},
 				},{
 					Name: "Kuteks",
 					Description: "Kuteks Description",
@@ -585,6 +720,13 @@ func seedMaster() {
 					Stock: 70000,
 					Rating: 5,
 					SubCategoryID:15,
+					Images: []*model.ProductImage{
+						{
+							URL: "https://cf.shopee.co.id/file/b84a884992b3bba4afa6f9883ae0718a",
+						},{
+							URL: "https://images.tokopedia.net/img/cache/700/VqbcmM/2020/12/4/7861e2c4-7408-43bc-a069-aece7827a878.jpg",
+						},
+					},
 				},
 			},
 		},
@@ -609,129 +751,40 @@ func seedMaster() {
 		},
 	}
 
-	productImage := []model.ProductImage{
+	campaign := []model.Campaign{
 		{
-			ProductID: 1,
-			URL: "https://static.bmdstatic.com/pk/product/medium/600fc3d770293.jpg",
-		},{
-			ProductID: 1,
-			URL: "https://cdn.medcom.id/images/content/2022/01/25/1381007/pKZzQ6uyCr.jpg",
-		},{
-			ProductID: 2,
-			URL: "https://www.notebookcheck.net/fileadmin/Notebooks/News/_nc3/iphone_12_pro_iphone_12_iphone_11_battery_life.jpg",
-		},{
-			ProductID: 2,
-			URL: "https://cdn.lumen.id/commerce/digimap/file/a4aa2367-2527-4a98-9b61-2db0468ba61c/PDP-iPhone-13-Pink-4-medium.jpeg",
-		},{
-			ProductID: 3,
-			URL: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//99/MTA-8107982/apple_iphone_11_64gb_full01_ge72ewvv.jpg",
-		},{
-			ProductID: 3,
-			URL: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/refurb-iphone-11-pro-gold-2019?wid=2000&hei=2000&fmt=jpeg&qlt=80&.v=1611101491000",
-		},{
-			ProductID: 4,
-			URL: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//96/MTA-3567047/apple_apple-iphone-x-64-gb-smartphone_full05.jpg",
-		},{
-			ProductID: 4,
-			URL: "https://images.tokopedia.net/img/cache/500-square/product-1/2019/5/3/60479447/60479447_b59bd146-2fd3-4c6c-80fe-0fc18fae89fb_529_529",
-		},{
-			ProductID: 5,
-			URL: "https://id-live-05.slatic.net/original/35fd56ea9616f0353f925169c8950e96.jpg_720x720q80.jpg_.webp",
-		},{
-			ProductID: 5,
-			URL: "https://id-live-05.slatic.net/p/ea1b93cbd237ecef42d4b90978134b38.jpg_720x720q80.jpg_.webp",
-		},{
-			ProductID: 6,
-			URL: "https://cdn.alloallo.media/catalog/product/apple/iphone/iphone-7/iphone-7-black.jpg",
-		},{
-			ProductID: 6,
-			URL: "https://jualku.com/wp-content/uploads/2019/05/apple-iphone-7-2.jpg",
-		},{
-			ProductID: 7,
-			URL: "https://support.apple.com/library/APPLE/APPLECARE_ALLGEOS/SP705/SP705-iphone_6-mul.png",
-		},{
-			ProductID: 7,
-			URL: "https://m.media-amazon.com/images/I/51+K8pddvbS._AC_SX679_.jpg",
-		},{
-			ProductID: 8,
-			URL: "https://d2xjmi1k71iy2m.cloudfront.net/dairyfarm/id/images/185/0818587_PE774509_S4.jpg",
-		},{
-			ProductID: 8,
-			URL: "https://d2xjmi1k71iy2m.cloudfront.net/dairyfarm/id/images/386/0938667_PE794238_S5.jpg",
-		},{
-			ProductID: 9,
-			URL: "https://static.bmdstatic.com/pk/product/large/6007d8624ea91.jpg",
-		},{
-			ProductID: 9,
-			URL: "https://store.stormfront.co.uk/content/images/thumbs/0014007_macbook_air_blush_pdp_image_position-2_m1_chip_usenjpg.jpeg",
-		},{
-			ProductID: 10,
-			URL: "https://d2xjmi1k71iy2m.cloudfront.net/dairyfarm/id/images/185/0818587_PE774509_S4.jpg",
-		},{
-			ProductID: 10,
-			URL: "https://d2xjmi1k71iy2m.cloudfront.net/dairyfarm/id/images/386/0938667_PE794238_S5.jpg",
-		},{
-			ProductID: 11,
-			URL: "https://www.ikea.com/us/en/images/products/vedbo-dining-table-black__0815091_pe772752_s5.jpg?f=s",
-		},{
-			ProductID: 11,
-			URL: "https://www.ikea.com/us/en/images/products/vedbo-dining-table-black__0766049_pe753697_s5.jpg?f=s",
-		},{
-			ProductID: 12,
-			URL: "https://cdn.shopify.com/s/files/1/2350/5189/products/Costa_dining_chair_side_new_800x.jpg?v=1580267464",
-		},{
-			ProductID: 12,
-			URL: "https://cdn.shopify.com/s/files/1/2350/5189/products/Costa_dining_chair_new.jpg?v=1580267381",
-		},{
-			ProductID: 13,
-			URL: "https://media.fds.fi/product_image/800/409Muuto_AK.jpg",
-		},{
-			ProductID: 13,
-			URL: "https://homeexporter.com/wp-content/uploads/2021/06/cafe-table-500x500-1.jpg",
-		},{
-			ProductID: 14,
-			URL: "https://i5.walmartimages.com/asr/f25bcbd9-edb2-497a-8349-33e4149fe92f_1.11b6a37662cf1e9353b51b11eb49e478.jpeg?odnHeight=612&odnWidth=612&odnBg=FFFFFF",
-		},{
-			ProductID: 14,
-			URL: "https://m.media-amazon.com/images/I/71bIrPF9ZOL._SX569_.jpg",
-		},{
-			ProductID: 15,
-			URL: "https://www.ikea.com/us/en/images/products/mammut-childrens-table-indoor-outdoor-blue__0735844_pe740211_s5.jpg?f=xs",
-		},{
-			ProductID: 15,
-			URL: "https://www.ikea.com/us/en/images/products/mammut-childrens-table-indoor-outdoor-red__0735839_pe740209_s5.jpg?f=xs",
-		},{
-			ProductID: 16,
-			URL: "https://cf.shopee.co.id/file/b912a4e15491159e041507b0e2b7bfec",
-		},{
-			ProductID: 16,
-			URL: "https://cf.shopee.co.id/file/e0752cfa1502d57d63ff78e7c2b0fb0a",
-		},{
-			ProductID: 17,
-			URL: "https://cf.shopee.co.id/file/279200f78807db8d820adee6f77fc54c",
-		},{
-			ProductID: 17,
-			URL: "https://image.femaledaily.com/dyn/640/images/prod-pics/product_1603968990_Scarlett_800x800.jpg",
-		},{
-			ProductID: 18,
-			URL: "https://id-live-05.slatic.net/shop/0b6ac54b74ae246ecdd4a28cbb4737fd.jpeg_2200x2200q80.jpg_.webp",
-		},{
-			ProductID: 18,
-			URL: "https://cf.shopee.co.id/file/3adee1925031b6735c47e38aa10a1dba",
-		},{
-			ProductID: 19,
-			URL: "https://cdn.idntimes.com/content-images/post/20211112/51ptxufjil-sl1080-2ad592db4fb55187edca9d98c4f61fe1.jpg",
-		},{
-			ProductID: 19,
-			URL: "https://cf.shopee.co.id/file/17505480c80c7745ea106a2da2fd84d7",
-		},{
-			ProductID: 20,
-			URL: "https://cf.shopee.co.id/file/b84a884992b3bba4afa6f9883ae0718a",
-		},{
-			ProductID: 20,
-			URL: "https://images.tokopedia.net/img/cache/700/VqbcmM/2020/12/4/7861e2c4-7408-43bc-a069-aece7827a878.jpg",
-		},
+			URL: "https://ecs7.tokopedia.net/img/cache/730/kjjBfF/2021/12/2/5b5ec00c-09c9-48cb-b295-c9d3eeae6cf9.jpg",
+		}, {
+			URL: "https://ecs7.tokopedia.net/img/kjjBfF/2021/1/28/79fec4a4-8220-45ca-8593-8b18eba14ffc.png",
+		}, {
+			URL: "https://ecs7.tokopedia.net/img/cache/730/kjjBfF/2021/5/19/f446d9b2-557d-4ae4-bbde-0e8eee846635.png",
+		}, {
+			URL: "https://ecs7.tokopedia.net/blog-tokopedia-com/uploads/2020/07/Tokopedia-2-3.jpg",
+		}, {
+			URL: "https://ecs7.tokopedia.net/blog-tokopedia-com/uploads/2021/05/Banner_Gosend-Tokopedia-Campaign.jpg",
+		}, {
+			URL: "https://lelogama.go-jek.com/post_thumbnail/Copy_of_Tokped_1456x818.jpg",
+		}, {
+			URL: "https://cdn.promolist.id/promo/1/611b5e84d29c6_d4f268dd28d20e61ec73f7e030059c40714e1ae60b2773e199ad35db93bcc14c.jpg",
+		}, {
+			URL: "https://1.bp.blogspot.com/-rl2PpwU1ZXw/YV5qMaBmNrI/AAAAAAAAMuc/QeF-aq4x2oM2PKvtrdAEyk2xvx2a77Z_wCNcBGAsYHQ/s800/pulsa%2BTokopedia.jpg",
+		}, {
+			URL: "https://ecs7.tokopedia.net/blog-tokopedia-com/uploads/2021/01/Tokopedia-x-BLACKPINK-1-1024x512.jpg",
+		}, {
+			URL: "https://siaranpers.id/wp-content/uploads/2021/01/Tokopedia-x-BTS-1.jpg",
+		}, {
+			URL: "https://ecs7.tokopedia.net/blog-tokopedia-com/uploads/2019/10/Tokopedia-Blog_BTS-Campaign_1200x620-1024x529.jpg",
+		}, {
+			URL: "https://pbs.twimg.com/media/EF7pxQ0UcAETWZC.jpg",
+		}, {
+			URL: "https://images.tokopedia.net/img/Template/FB-Twitter-Mega-cashback-Oktober.jpg",
+		}, {
+			URL: "http://jagoanindonesia.id/wp-content/uploads/2020/06/tokopedia-toppicks_1024x1024-1.jpg",
+		}, {
+			URL: "https://ecs7.tokopedia.net/img/blog/seller/2020/09/statistik-new-768x400.jpg",
+		}, 
 	}
+	db.Create(&campaign)
 	db.Create(&badge)
 	db.Create(&shipping)
 	db.Create(&voucher)
@@ -740,6 +793,5 @@ func seedMaster() {
 	db.Create(&subCategory)
 	db.Create(&shop)
 	db.Create(&shopVendor)
-	db.Create(&productImage)
 }
 

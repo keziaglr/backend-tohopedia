@@ -11,7 +11,7 @@ import (
 	"github.com/keziaglr/backend-tohopedia/graph/model"
 )
 
-func (r *mutationResolver) CreateUser(ctx context.Context, input model.RegisterUser) (*model.User, error) {
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.AuthUser) (*model.User, error) {
 	var otp model.Otp
 	r.DB.Debug().First(&otp, "code=?", input.OtpCode)
 
@@ -27,7 +27,8 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.RegisterU
 	r.DB.Delete(&otp, "code=?", input.OtpCode)
 
 	user := model.User{
-		Email: input.Email,
+		Email:    input.Email,
+		Password: input.Password,
 	}
 
 	r.DB.Create(&user)
@@ -35,16 +36,51 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.RegisterU
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, id int, input model.UpdateUser) (*model.User, error) {
-	updatedUser := model.User{
-		ProfilePicture: input.ProfilePicture,
-		Name:           input.Name,
-		Dob:            input.Dob,
-		Gender:         input.Gender,
-		Email:          input.Gender,
-		PhoneNumber:    input.PhoneNumber,
+	var user *model.User
+	r.DB.Where("id = ?", id).First(&user)
+	
+	if user != nil{
+		user.ProfilePicture = input.ProfilePicture
+		user.Name = input.Name
+		user.Dob = input.Dob
+		user.Gender = input.Gender
+		user.Email = input.Email
+		user.PhoneNumber = input.PhoneNumber
+		r.DB.Save(&user)
+		return user, nil
 	}
-	r.DB.Save(&updatedUser)
-	return &updatedUser, nil
+	return nil, nil	
+	
+}
+
+func (r *mutationResolver) ResetPassword(ctx context.Context, email string, password string) (*model.User, error) {
+	var user *model.User
+	r.DB.Where("email = ?", email).First(&user)
+
+	if user == nil {
+		return nil, nil
+	}
+
+	var otp model.Otp
+	r.DB.Debug().First(&otp, "code=?", otpCode)
+
+	if otp.ID == 0 {
+		return nil, nil
+	}
+
+	if time.Since(otp.ValidTime).Minutes() >= 2 {
+		r.DB.Delete(&otp, "code=?", otpCode)
+		return nil, nil
+	}
+
+	r.DB.Delete(&otp, "code=?", input.OtpCode)
+	
+	if user != nil{
+		user.Password = password;
+		r.DB.Save(&user)
+		return user, nil
+	}
+	return nil, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
@@ -53,9 +89,23 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	return users, nil
 }
 
-func (r *queryResolver) GetUserAuth(ctx context.Context, email string, password string) (*model.User, error) {
+func (r *queryResolver) GetUserByEmailPass(ctx context.Context, email string, password string) (*model.User, error) {
 	var user *model.User
 	r.DB.Where("email = ? AND password = ?", email, password).First(&user)
+
+	if user == nil {
+		return nil, nil
+	}
+	return user, nil
+}
+
+func (r *queryResolver) GetUserAuth(ctx context.Context, input model.AuthUser) (*model.User, error) {
+	var user *model.User
+	r.DB.Where("email = ? AND password = ?", input.Email, input.Password).First(&user)
+
+	if user == nil {
+		return nil, nil
+	}
 
 	var otp model.Otp
 	r.DB.Debug().First(&otp, "code=?", input.OtpCode)
@@ -74,6 +124,20 @@ func (r *queryResolver) GetUserAuth(ctx context.Context, email string, password 
 	return user, nil
 }
 
+func (r *queryResolver) GetUserByID(ctx context.Context, id int) (*model.User, error) {
+	var user *model.User
+	r.DB.Where("id = ?", id).First(&user)
+
+	return user, nil
+}
+
+func (r *queryResolver) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
+	var user *model.User
+	r.DB.Where("email = ?", email).First(&user)
+
+	return user, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
@@ -82,3 +146,34 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+package model
+
+import (
+	"time"
+)
+
+type Product struct {
+	ID          int             `json:"id" gorm:"primaryKey"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Price       int             `json:"price"`
+	Discount    int             `json:"discount"`
+	MetaData    string          `json:"metaData"`
+	AddedTime   time.Time       `json:"addedTime"`
+	Stock       int             `json:"stock"`
+	Rating      int             `json:"rating"`
+	SubCategoryID  int             `json:"sub_category_id"`
+	SubCategory    *SubCategory    `json:"category" gorm:"foreignKey:SubCategoryID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	CreatedAt   time.Time       `json:"createdAt"`
+	UpdatedAt   time.Time       `json:"updatedAt"`
+	DeletedAt   time.Time       `json:"deletedAt"`
+}
+
+type ProductImage struct {
+	ID        int      `json:"id" gorm:"primaryKey"`
+	ProductID int      `json:"product_id"`
+	URL       string   `json:"url"`
+	Product   *Product `json:"product" gorm:"foreignKey:ProductID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+}
+

@@ -10,3 +10,8 @@ type SubCategory{
 
     category: Category!
 }
+
+extend type Query{
+    categories: [Category!]!
+    getSubCategories(categoryId: String!): [SubCategory!]!
+}

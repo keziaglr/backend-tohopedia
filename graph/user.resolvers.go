@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/keziaglr/backend-tohopedia/graph/generated"
@@ -36,21 +35,75 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.AuthUser)
 	return &user, nil
 }
 
-func (r *mutationResolver) UpdateUser(ctx context.Context, id int, input model.UpdateUser) (*model.User, error) {
-	updatedUser := model.User{
-		ProfilePicture: input.ProfilePicture,
-		Name:           input.Name,
-		Dob:            input.Dob,
-		Gender:         input.Gender,
-		Email:          input.Gender,
-		PhoneNumber:    input.PhoneNumber,
+func (r *mutationResolver) AuthUser(ctx context.Context, input model.AuthUser) (*model.User, error) {
+	var user *model.User
+	r.DB.Where("email = ? AND password = ?", input.Email, input.Password).First(&user)
+
+	if user == nil {
+		return nil, nil
 	}
-	r.DB.Save(&updatedUser)
-	return &updatedUser, nil
+
+	var otp model.Otp
+	r.DB.Debug().First(&otp, "code=?", input.OtpCode)
+
+	if otp.ID == 0 {
+		return nil, nil
+	}
+
+	if time.Since(otp.ValidTime).Minutes() >= 2 {
+		r.DB.Delete(&otp, "code=?", input.OtpCode)
+		return nil, nil
+	}
+
+	r.DB.Delete(&otp, "code=?", input.OtpCode)
+	return user, nil
 }
 
-func (r *mutationResolver) ResetPassword(ctx context.Context, id int, password string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) UpdateUser(ctx context.Context, id int, input model.UpdateUser) (*model.User, error) {
+	var user *model.User
+	r.DB.Where("id = ?", id).First(&user)
+
+	if user != nil {
+		user.ProfilePicture = input.ProfilePicture
+		user.Name = input.Name
+		user.Dob = input.Dob
+		user.Gender = input.Gender
+		user.Email = input.Email
+		user.PhoneNumber = input.PhoneNumber
+		r.DB.Save(&user)
+		return user, nil
+	}
+	return nil, nil
+}
+
+func (r *mutationResolver) ResetPassword(ctx context.Context, input model.AuthUser) (*model.User, error) {
+	var user *model.User
+	r.DB.Where("email = ?", input.Email).First(&user)
+
+	if user == nil {
+		return nil, nil
+	}
+
+	var otp model.Otp
+	r.DB.Debug().First(&otp, "code=?", input.OtpCode)
+
+	if otp.ID == 0 {
+		return nil, nil
+	}
+
+	if time.Since(otp.ValidTime).Minutes() >= 2 {
+		r.DB.Delete(&otp, "code=?", input.OtpCode)
+		return nil, nil
+	}
+
+	r.DB.Delete(&otp, "code=?", input.OtpCode)
+
+	if user != nil {
+		user.Password = input.Password
+		r.DB.Save(&user)
+		return user, nil
+	}
+	return nil, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
@@ -72,24 +125,6 @@ func (r *queryResolver) GetUserByEmailPass(ctx context.Context, email string, pa
 func (r *queryResolver) GetUserAuth(ctx context.Context, input model.AuthUser) (*model.User, error) {
 	var user *model.User
 	r.DB.Where("email = ? AND password = ?", input.Email, input.Password).First(&user)
-
-	if user == nil {
-		return nil, nil
-	}
-
-	var otp model.Otp
-	r.DB.Debug().First(&otp, "code=?", input.OtpCode)
-
-	if otp.ID == 0 {
-		return nil, nil
-	}
-
-	if time.Since(otp.ValidTime).Minutes() >= 2 {
-		r.DB.Delete(&otp, "code=?", input.OtpCode)
-		return nil, nil
-	}
-
-	r.DB.Delete(&otp, "code=?", input.OtpCode)
 
 	return user, nil
 }

@@ -8,6 +8,11 @@ type AuthUser struct {
 	OtpCode  string `json:"otpCode"`
 }
 
+type Campaign struct {
+	ID  int    `json:"id"`
+	URL string `json:"url"`
+}
+
 type CreateShop struct {
 	PhoneNumber string `json:"phoneNumber"`
 	Name        string `json:"name"`
