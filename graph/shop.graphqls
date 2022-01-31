@@ -30,6 +30,18 @@ type ShopShippingVendor{
     vendor: ShippingVendor!
 }
 
+type ShopVoucher{
+    shop_id: Int!
+    voucher_id: Int!
+
+    shop: Shop!
+    voucher: Voucher!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!
+}
+
 input CreateShop{
     phoneNumber: String!
     name: String!
@@ -50,4 +62,8 @@ input UpdateShop{
 extend type Mutation{
     createShop(input: CreateShop!): Shop!
     updateShop(id: Int!, input: UpdateShop!): Shop!
+}
+
+extend type Query{
+    getShopByProduct(productId: Int!): Shop!
 }

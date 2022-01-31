@@ -177,3 +177,157 @@ type ProductImage struct {
 	Product   *Product `json:"product" gorm:"foreignKey:ProductID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
+package model
+
+import (
+	"time"
+)
+
+type Shop struct {
+	ID                int               `json:"id"`
+	UserID            int               `json:"user_id"`
+	Name              string            `json:"name"`
+	NameSlug          string            `json:"nameSlug"`
+	Points            int               `json:"points"`
+	Image             string            `json:"image"`
+	OperationalStatus string            `json:"operationalStatus"`
+	OperationalHour   string            `json:"operationalHour"`
+	Description       string            `json:"description"`
+	Slogan            string            `json:"slogan"`
+	Address           string            `json:"address"`
+	PhoneNumber       string            `json:"phoneNumber"`
+	BadgesID          int               `json:"badges_id"`
+	Badges            *Badges           `json:"badges" gorm:"foreignKey:BadgesID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Product           []*Product        `json:"product" gorm:"many2many:shop_product;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	User              *User             `json:"user" gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	CreatedAt         time.Time         `json:"createdAt"`
+	UpdatedAt         time.Time         `json:"updatedAt"`
+	DeletedAt         time.Time         `json:"deletedAt"`
+}
+
+type ShopShippingVendor struct {
+	ShopID   int             `json:"shop_id"`
+	VendorID int             `json:"vendor_id"`
+	Shop     *Shop           `json:"shop" gorm:"foreignKey:ShopID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Vendor   *ShippingVendor `json:"vendor" gorm:"foreignKey:VendorID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+}
+
+package model
+
+import (
+	"time"
+)
+
+type User struct {
+	ID              int        `json:"id" gorm:"primaryKey"`
+	Name            string     `json:"name"`
+	Email           string     `json:"email"`
+	Password        string     `json:"password"`
+	Dob             string     `json:"dob"`
+	Gender          string     `json:"gender"`
+	PhoneNumber     string     `json:"phoneNumber"`
+	ProfilePicture  string     `json:"profilePicture"`
+	IsSuspend       bool       `json:"isSuspend"`
+	ShippingAddress string     `json:"shippingAddress"`
+	Role            string     `json:"role"`
+	Voucher         []*Voucher `json:"voucher" gorm:"many2many:user_voucher;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Wishlist        []*Product `json:"wishlist" gorm:"many2many:user_wishlist;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	CreatedAt       time.Time  `json:"createdAt"`
+	UpdatedAt       time.Time  `json:"updatedAt"`
+	DeletedAt       time.Time  `json:"deletedAt"`
+}
+package model
+
+import (
+	"time"
+)
+
+type User struct {
+	ID              int        `json:"id" gorm:"primaryKey"`
+	Name            string     `json:"name"`
+	Email           string     `json:"email"`
+	Password        string     `json:"password"`
+	Dob             string     `json:"dob"`
+	Gender          string     `json:"gender"`
+	PhoneNumber     string     `json:"phoneNumber"`
+	ProfilePicture  string     `json:"profilePicture"`
+	IsSuspend       bool       `json:"isSuspend"`
+	ShippingAddress string     `json:"shippingAddress"`
+	Role            string     `json:"role"`
+	Voucher         []*Voucher `json:"voucher" gorm:"many2many:user_voucher;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Wishlist        []*Product `json:"wishlist" gorm:"many2many:user_wishlist;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	CreatedAt       time.Time  `json:"createdAt"`
+	UpdatedAt       time.Time  `json:"updatedAt"`
+	DeletedAt       time.Time  `json:"deletedAt"`
+}
+
+package graph
+
+// This file will be automatically regenerated based on the schema, any resolver implementations
+// will be copied through when generating and any unknown code will be moved to the end.
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/keziaglr/backend-tohopedia/graph/generated"
+	"github.com/keziaglr/backend-tohopedia/graph/model"
+)
+
+func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
+	var products []*model.Product
+	r.DB.Find(&products)
+	return products, nil
+}
+
+func (r *queryResolver) GetProductByID(ctx context.Context, id int) (*model.Product, error) {
+	var product *model.Product
+	r.DB.Where("id=?", id).First(&product)
+	return product, nil
+}
+
+func (r *queryResolver) GetProductsByShop(ctx context.Context, shopID int) ([]*model.Product, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) GetProductsTopDisc(ctx context.Context) ([]*model.Product, error) {
+	var products []*model.Product
+	r.DB.Limit(15).Order("discount DESC").Preload("Images").Find(&products)
+	return products, nil
+}
+
+func (r *queryResolver) GetProductsByCategories(ctx context.Context, categoryID int) ([]*model.Product, error) {
+	var products []*model.Product
+	r.DB.Where("sub_category_id=?", categoryID).Find(&products)
+	return products, nil
+}
+
+func (r *queryResolver) GetProductsSearch(ctx context.Context, search string) ([]*model.Product, error) {
+	var products []*model.Product
+	r.DB.Where("name LIKE ?", "%name%").Find(&products)
+	return products, nil
+}
+
+func (r *queryResolver) GetProductOrder(ctx context.Context, by string, order string) ([]*model.Product, error) {
+	var products []*model.Product
+	r.DB.Order(by + " " + order).Find(&products)
+	return products, nil
+}
+
+func (r *queryResolver) GetProductFilter(ctx context.Context, by string, value string) ([]*model.Product, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *productResolver) SoldCount(ctx context.Context, obj *model.Product) (int, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *Resolver) Product() generated.ProductResolver { return &productResolver{r} }
+
+type productResolver struct{ *Resolver }
+

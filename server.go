@@ -64,7 +64,6 @@ func initDB() {
 }
 
 func migrate(){
-	db.Exec("DROP TABLE product_images, shop_product, user_wishlist, user_voucher")
 	
 	db.Migrator().DropTable(
 		&model.Campaign{},
@@ -78,6 +77,9 @@ func migrate(){
 		&model.User{}, 
 		&model.Shop{}, 
 		&model.ShopShippingVendor{},
+		&model.ShopVoucher{},
+		&model.UserVoucher{},
+		&model.UserWishlist{}, 
 		&model.Cart{}, 
 		&model.Chat{}, 
 		&model.ChatDetail{}, 
@@ -92,6 +94,7 @@ func migrate(){
 		&model.TransactionDetail{},
 	)
 	
+	db.Exec("DROP TABLE product_images, shop_product, user_wishlist, user_voucher")
 	db.AutoMigrate(
 		&model.Campaign{},
 		&model.ShippingVendor{},
@@ -102,8 +105,11 @@ func migrate(){
 		&model.ProductImage{}, 
 		&model.Product{},
 		&model.User{}, 
-		&model.Shop{}, 
+		&model.Shop{},
 		&model.ShopShippingVendor{},
+		&model.ShopVoucher{},
+		&model.UserVoucher{},
+		&model.UserWishlist{}, 
 		&model.Cart{}, 
 		&model.Chat{}, 
 		&model.ChatDetail{}, 
@@ -362,6 +368,7 @@ func seedMaster() {
 					Discount: 10,
 					MetaData: "Weight: 3gram",
 					AddedTime: time.Now(),
+					SoldCount: 100,
 					Stock: 10000,
 					Rating: 5,
 					SubCategoryID:6,
@@ -380,6 +387,7 @@ func seedMaster() {
 					MetaData: "Weight: 1gram",
 					AddedTime: time.Now(),
 					Stock: 200000,
+					SoldCount: 250,
 					Rating: 4,
 					SubCategoryID:5,
 					Images: []*model.ProductImage{
@@ -394,6 +402,7 @@ func seedMaster() {
 					Description: "IPhone 12 Description",
 					Price: 600000,
 					Discount: 3,
+					SoldCount: 250,
 					MetaData: "Weight: 1gram",
 					AddedTime: time.Now(),
 					Stock: 200000,
@@ -411,6 +420,7 @@ func seedMaster() {
 					Description: "IPhone 11 Description",
 					Price: 650000,
 					Discount: 4,
+					SoldCount: 300,
 					MetaData: "Weight: 1gram",
 					AddedTime: time.Now(),
 					Stock: 50000,
@@ -428,6 +438,7 @@ func seedMaster() {
 					Description: "IPhone X Description",
 					Price: 500000,
 					Discount: 7,
+					SoldCount: 400,
 					MetaData: "Weight: 1gram",
 					AddedTime: time.Now(),
 					Stock: 70000,
@@ -445,6 +456,7 @@ func seedMaster() {
 					Description: "IPhone 8 Description",
 					Price: 800000,
 					Discount: 8,
+					SoldCount: 600,
 					MetaData: "Weight: 1gram",
 					AddedTime: time.Now(),
 					Stock: 80000,
@@ -462,6 +474,7 @@ func seedMaster() {
 					Description: "IPhone 7 Description",
 					Price: 700000,
 					Discount: 7,
+					SoldCount: 100,
 					MetaData: "Weight: 0.8gram",
 					AddedTime: time.Now(),
 					Stock: 70000,
@@ -479,6 +492,7 @@ func seedMaster() {
 					Description: "IPhone 6 Description",
 					Price: 600000,
 					Discount: 6,
+					SoldCount: 250,
 					MetaData: "Weight: 0.75gram",
 					AddedTime: time.Now(),
 					Stock: 60000,
@@ -496,6 +510,7 @@ func seedMaster() {
 					Description: "MacBook Air Description",
 					Price: 8920000,
 					Discount: 3,
+					SoldCount: 200,
 					MetaData: "Weight: 2gram",
 					AddedTime: time.Now(),
 					Stock: 60000,
@@ -528,6 +543,7 @@ func seedMaster() {
 					Name: "Sofa",
 					Description: "Sofa Description",
 					Price: 9200000,
+					SoldCount: 300,
 					Discount: 10,
 					MetaData: "Weight: 10gram",
 					AddedTime: time.Now(),
@@ -546,6 +562,7 @@ func seedMaster() {
 					Description: "Dining Table Description",
 					Price: 7630000,
 					Discount: 5,
+					SoldCount: 200,
 					MetaData: "Weight: 20gram",
 					AddedTime: time.Now(),
 					Stock: 250000,
@@ -567,6 +584,7 @@ func seedMaster() {
 					AddedTime: time.Now(),
 					Stock: 5000,
 					Rating: 3,
+					SoldCount: 250,
 					SubCategoryID:1,
 					Images: []*model.ProductImage{
 						{
@@ -584,6 +602,7 @@ func seedMaster() {
 					AddedTime: time.Now(),
 					Stock: 250000,
 					Rating: 4,
+					SoldCount: 250,
 					SubCategoryID:2,
 					Images: []*model.ProductImage{
 						{
@@ -601,6 +620,7 @@ func seedMaster() {
 					AddedTime: time.Now(),
 					Stock: 4000,
 					Rating: 5,
+					SoldCount: 250,
 					SubCategoryID:1,
 					Images: []*model.ProductImage{
 						{
@@ -618,6 +638,7 @@ func seedMaster() {
 					AddedTime: time.Now(),
 					Stock: 250000,
 					Rating: 5,
+					SoldCount: 250,
 					SubCategoryID:2,
 					Images: []*model.ProductImage{
 						{
@@ -650,6 +671,7 @@ func seedMaster() {
 					MetaData: "Weight: 1gram",
 					AddedTime: time.Now(),
 					Stock: 10000,
+					SoldCount: 250,
 					Rating: 5,
 					SubCategoryID:13,
 					Images: []*model.ProductImage{
@@ -667,6 +689,7 @@ func seedMaster() {
 					MetaData: "Weight: 1gram",
 					AddedTime: time.Now(),
 					Stock: 200000,
+					SoldCount: 300,
 					Rating: 4,
 					SubCategoryID:13,
 					Images: []*model.ProductImage{
@@ -684,6 +707,7 @@ func seedMaster() {
 					MetaData: "Weight: 1gram",
 					AddedTime: time.Now(),
 					Stock: 200000,
+					SoldCount: 700,
 					Rating: 5,
 					SubCategoryID:13,
 					Images: []*model.ProductImage{
@@ -702,6 +726,7 @@ func seedMaster() {
 					AddedTime: time.Now(),
 					Stock: 50000,
 					Rating: 4,
+					SoldCount: 1000,
 					SubCategoryID:14,
 					Images: []*model.ProductImage{
 						{
@@ -719,6 +744,7 @@ func seedMaster() {
 					AddedTime: time.Now(),
 					Stock: 70000,
 					Rating: 5,
+					SoldCount: 10,
 					SubCategoryID:15,
 					Images: []*model.ProductImage{
 						{
@@ -748,6 +774,25 @@ func seedMaster() {
 		},{
 			ShopID: 2,
 			VendorID: 4,
+		},
+	}
+
+	shopVoucher := []model.ShopVoucher{
+		{
+			ShopID: 1,
+			VoucherID: 1,
+		},{
+			ShopID: 1,
+			VoucherID: 2,
+		},{
+			ShopID: 1,
+			VoucherID: 3,
+		},{
+			ShopID: 2,
+			VoucherID: 3,
+		},{
+			ShopID: 2,
+			VoucherID: 1,
 		},
 	}
 
@@ -793,5 +838,6 @@ func seedMaster() {
 	db.Create(&subCategory)
 	db.Create(&shop)
 	db.Create(&shopVendor)
+	db.Create(&shopVoucher)
 }
 

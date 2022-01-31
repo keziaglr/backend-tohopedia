@@ -18,7 +18,7 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 
 func (r *queryResolver) GetProductByID(ctx context.Context, id int) (*model.Product, error) {
 	var product *model.Product
-	r.DB.Where("id=?", id).First(&product)
+	r.DB.Preload("Images").Where("id=?", id).First(&product)
 	return product, nil
 }
 

@@ -13,8 +13,29 @@ type User {
     shippingAddress: String!
     role: String!
 
-    voucher: [Voucher!]!
-    wishlist: [Product!]!
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!
+}
+
+type UserVoucher{
+    voucher_id: Int!
+    voucher: Voucher!
+
+    user_id: Int!
+    user:User!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!
+}
+
+type UserWishlist{
+    product_id: Int!
+    product: Product!
+
+    user_id: Int!
+    user:User!
 
     createdAt: Time!
     updatedAt: Time!

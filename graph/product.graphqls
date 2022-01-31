@@ -8,6 +8,7 @@ type Product{
     addedTime: Time!
     stock: Int!
     rating: Int!
+    soldCount: Int!
     
     sub_category_id: Int!
     sub_category: SubCategory!

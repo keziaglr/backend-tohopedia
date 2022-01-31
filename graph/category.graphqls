@@ -13,5 +13,5 @@ type SubCategory{
 
 extend type Query{
     categories: [Category!]!
-    getSubCategories(categoryId: String!): [SubCategory!]!
+    getSubCategories(categoryId: Int!): [SubCategory!]!
 }

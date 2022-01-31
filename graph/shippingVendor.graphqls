@@ -4,3 +4,7 @@ type ShippingVendor{
     deliveryTime: Int!
     price: Int!
 }
+
+extend type Query{
+    getVendorByShop(shopId: Int!): [ShippingVendor]
+}

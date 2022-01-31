@@ -7,3 +7,7 @@ type Voucher{
     startTime: Time!
     endTime: Time!
 }
+
+extend type Query{
+    getVoucherByShop(shopId: Int!): [Voucher]
+}

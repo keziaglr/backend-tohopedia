@@ -3,6 +3,7 @@ type Cart{
     user_id: Int!
     product_id: Int!
     qty: Int!
+    note: String!
 
     product: Product!
     user: User!

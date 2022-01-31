@@ -14,6 +14,7 @@ type Product struct {
 	AddedTime     time.Time       `json:"addedTime"`
 	Stock         int             `json:"stock"`
 	Rating        int             `json:"rating"`
+	SoldCount	int 			`json:"sold_count"`
 	SubCategoryID int             `json:"sub_category_id"`
 	SubCategory   *SubCategory    `json:"sub_category" gorm:"foreignKey:SubCategoryID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Images        []*ProductImage `json:"images" gorm:"many2many:product_image;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
