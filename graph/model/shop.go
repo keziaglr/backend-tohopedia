@@ -5,7 +5,7 @@ import (
 )
 
 type Shop struct {
-	ID                int               `json:"id"`
+	ID                int               `json:"id" gorm:"primaryKey"`
 	UserID            int               `json:"user_id"`
 	Name              string            `json:"name"`
 	NameSlug          string            `json:"nameSlug"`
@@ -17,6 +17,8 @@ type Shop struct {
 	Slogan            string            `json:"slogan"`
 	Address           string            `json:"address"`
 	PhoneNumber       string            `json:"phoneNumber"`
+	TypeID			int					`json:"type_id"`
+	Type			*ShopType			`json:"shop_type" gorm:"foreignKey:TypeID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	BadgesID          int               `json:"badges_id"`
 	Badges            *Badges           `json:"badges" gorm:"foreignKey:BadgesID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Product           []*Product        `json:"product" gorm:"many2many:shop_product;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
@@ -27,14 +29,14 @@ type Shop struct {
 }
 
 type ShopShippingVendor struct {
-	ShopID   int             `json:"shop_id"`
+	ShopID   int             `json:"shop_id" gorm:"primaryKey"`
 	VendorID int             `json:"vendor_id"`
 	Shop     *Shop           `json:"shop" gorm:"foreignKey:ShopID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Vendor   *ShippingVendor `json:"vendor" gorm:"foreignKey:VendorID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type ShopVoucher struct {
-	ShopID    int       `json:"shop_id"`
+	ShopID    int       `json:"shop_id" gorm:"primaryKey"`
 	VoucherID int       `json:"voucher_id"`
 	Shop      *Shop     `json:"shop" gorm:"foreignKey:ShopID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Voucher   *Voucher  `json:"voucher" gorm:"foreignKey:VoucherID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`

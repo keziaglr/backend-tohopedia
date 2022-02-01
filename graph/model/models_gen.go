@@ -20,6 +20,22 @@ type CreateShop struct {
 	Address     string `json:"address"`
 }
 
+type Filter struct {
+	Type         []*string `json:"type"`
+	Location     []*string `json:"location"`
+	MinPrice     *int      `json:"minPrice"`
+	MaxPrice     *int      `json:"maxPrice"`
+	Courier      []*string `json:"courier"`
+	Rating       []*int    `json:"rating"`
+	ShippingTime []*int    `json:"shippingTime"`
+	ProductAdded []*string `json:"productAdded"`
+}
+
+type ShopType struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 type UpdateShop struct {
 	ProfilePicture    string `json:"profilePicture"`
 	Name              string `json:"name"`

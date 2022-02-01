@@ -6,5 +6,5 @@ type ShippingVendor{
 }
 
 extend type Query{
-    getVendorByShop(shopId: Int!): [ShippingVendor]
+    getVendorByProduct(productId: Int!): [ShippingVendor]
 }

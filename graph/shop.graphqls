@@ -1,3 +1,8 @@
+type ShopType{
+    id: Int!
+    name: String!
+}
+
 type Shop{
     id: Int!
     user_id: Int!
@@ -12,6 +17,9 @@ type Shop{
     address: String!
     phoneNumber: String!
     
+
+    type_id: Int!
+    type: ShopType!
     badges_id: Int!
     badges: Badges!
     product: [Product]
@@ -66,4 +74,5 @@ extend type Mutation{
 
 extend type Query{
     getShopByProduct(productId: Int!): Shop!
+    getShopMatch(search: String!): Shop!
 }

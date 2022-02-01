@@ -9,5 +9,5 @@ type Voucher{
 }
 
 extend type Query{
-    getVoucherByShop(shopId: Int!): [Voucher]
+    getVoucherByProduct(productId: Int!): [Voucher]
 }

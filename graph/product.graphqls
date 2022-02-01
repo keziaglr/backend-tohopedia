@@ -24,13 +24,23 @@ type ProductImage{
     url: String!
 }
 
+input Filter{
+    type: [String]
+    location: [String]
+    minPrice: Int
+    maxPrice: Int
+    courier: [String]
+    rating: [Int]
+    shippingTime: [Int]
+    productAdded: [String]   
+}
+
 extend type Query{
     products: [Product!]!
     getProductById(id: Int!): Product!
     getProductsByShop(shopID: Int!): [Product!]!
     getProductsTopDisc: [Product!]!
     getProductsByCategories(categoryId: Int!): [Product!]!
-    getProductsSearch(search: String!): [Product!]!
-    getProductOrder(by: String!, order:String!): [Product!]!
-    getProductFilter(by: String!, value: String!): [Product!]!
+    getProductsSearch(search: String!, sort: String, input: Filter): [Product!]!
+    getProductsMatch(search: String!): [Product!]!
 }

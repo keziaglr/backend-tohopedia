@@ -146,20 +146,20 @@ type ComplexityRoot struct {
 		Campaigns               func(childComplexity int) int
 		Categories              func(childComplexity int) int
 		GetProductByID          func(childComplexity int, id int) int
-		GetProductFilter        func(childComplexity int, by string, value string) int
-		GetProductOrder         func(childComplexity int, by string, order string) int
 		GetProductsByCategories func(childComplexity int, categoryID int) int
 		GetProductsByShop       func(childComplexity int, shopID int) int
-		GetProductsSearch       func(childComplexity int, search string) int
+		GetProductsMatch        func(childComplexity int, search string) int
+		GetProductsSearch       func(childComplexity int, search string, sort *string, input *model.Filter) int
 		GetProductsTopDisc      func(childComplexity int) int
 		GetShopByProduct        func(childComplexity int, productID int) int
+		GetShopMatch            func(childComplexity int, search string) int
 		GetSubCategories        func(childComplexity int, categoryID int) int
 		GetUserAuth             func(childComplexity int, input model.AuthUser) int
 		GetUserByEmail          func(childComplexity int, email string) int
 		GetUserByEmailPass      func(childComplexity int, email string, password string) int
 		GetUserByID             func(childComplexity int, id int) int
-		GetVendorByShop         func(childComplexity int, shopID int) int
-		GetVoucherByShop        func(childComplexity int, shopID int) int
+		GetVendorByProduct      func(childComplexity int, productID int) int
+		GetVoucherByProduct     func(childComplexity int, productID int) int
 		Products                func(childComplexity int) int
 		Users                   func(childComplexity int) int
 	}
@@ -225,6 +225,8 @@ type ComplexityRoot struct {
 		Points            func(childComplexity int) int
 		Product           func(childComplexity int) int
 		Slogan            func(childComplexity int) int
+		Type              func(childComplexity int) int
+		TypeID            func(childComplexity int) int
 		UpdatedAt         func(childComplexity int) int
 		User              func(childComplexity int) int
 		UserID            func(childComplexity int) int
@@ -235,6 +237,11 @@ type ComplexityRoot struct {
 		ShopID   func(childComplexity int) int
 		Vendor   func(childComplexity int) int
 		VendorID func(childComplexity int) int
+	}
+
+	ShopType struct {
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
 	}
 
 	ShopVoucher struct {
@@ -357,12 +364,12 @@ type QueryResolver interface {
 	GetProductsByShop(ctx context.Context, shopID int) ([]*model.Product, error)
 	GetProductsTopDisc(ctx context.Context) ([]*model.Product, error)
 	GetProductsByCategories(ctx context.Context, categoryID int) ([]*model.Product, error)
-	GetProductsSearch(ctx context.Context, search string) ([]*model.Product, error)
-	GetProductOrder(ctx context.Context, by string, order string) ([]*model.Product, error)
-	GetProductFilter(ctx context.Context, by string, value string) ([]*model.Product, error)
-	GetVendorByShop(ctx context.Context, shopID int) ([]*model.ShippingVendor, error)
+	GetProductsSearch(ctx context.Context, search string, sort *string, input *model.Filter) ([]*model.Product, error)
+	GetProductsMatch(ctx context.Context, search string) ([]*model.Product, error)
+	GetVendorByProduct(ctx context.Context, productID int) ([]*model.ShippingVendor, error)
 	GetShopByProduct(ctx context.Context, productID int) (*model.Shop, error)
-	GetVoucherByShop(ctx context.Context, shopID int) ([]*model.Voucher, error)
+	GetShopMatch(ctx context.Context, search string) (*model.Shop, error)
+	GetVoucherByProduct(ctx context.Context, productID int) ([]*model.Voucher, error)
 }
 
 type executableSchema struct {
@@ -917,30 +924,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetProductByID(childComplexity, args["id"].(int)), true
 
-	case "Query.getProductFilter":
-		if e.complexity.Query.GetProductFilter == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getProductFilter_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetProductFilter(childComplexity, args["by"].(string), args["value"].(string)), true
-
-	case "Query.getProductOrder":
-		if e.complexity.Query.GetProductOrder == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getProductOrder_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetProductOrder(childComplexity, args["by"].(string), args["order"].(string)), true
-
 	case "Query.getProductsByCategories":
 		if e.complexity.Query.GetProductsByCategories == nil {
 			break
@@ -965,6 +948,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetProductsByShop(childComplexity, args["shopID"].(int)), true
 
+	case "Query.getProductsMatch":
+		if e.complexity.Query.GetProductsMatch == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getProductsMatch_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetProductsMatch(childComplexity, args["search"].(string)), true
+
 	case "Query.getProductsSearch":
 		if e.complexity.Query.GetProductsSearch == nil {
 			break
@@ -975,7 +970,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetProductsSearch(childComplexity, args["search"].(string)), true
+		return e.complexity.Query.GetProductsSearch(childComplexity, args["search"].(string), args["sort"].(*string), args["input"].(*model.Filter)), true
 
 	case "Query.getProductsTopDisc":
 		if e.complexity.Query.GetProductsTopDisc == nil {
@@ -995,6 +990,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetShopByProduct(childComplexity, args["productId"].(int)), true
+
+	case "Query.getShopMatch":
+		if e.complexity.Query.GetShopMatch == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getShopMatch_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetShopMatch(childComplexity, args["search"].(string)), true
 
 	case "Query.getSubCategories":
 		if e.complexity.Query.GetSubCategories == nil {
@@ -1056,29 +1063,29 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetUserByID(childComplexity, args["id"].(int)), true
 
-	case "Query.getVendorByShop":
-		if e.complexity.Query.GetVendorByShop == nil {
+	case "Query.getVendorByProduct":
+		if e.complexity.Query.GetVendorByProduct == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getVendorByShop_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_getVendorByProduct_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetVendorByShop(childComplexity, args["shopId"].(int)), true
+		return e.complexity.Query.GetVendorByProduct(childComplexity, args["productId"].(int)), true
 
-	case "Query.getVoucherByShop":
-		if e.complexity.Query.GetVoucherByShop == nil {
+	case "Query.getVoucherByProduct":
+		if e.complexity.Query.GetVoucherByProduct == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getVoucherByShop_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_getVoucherByProduct_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetVoucherByShop(childComplexity, args["shopId"].(int)), true
+		return e.complexity.Query.GetVoucherByProduct(childComplexity, args["productId"].(int)), true
 
 	case "Query.products":
 		if e.complexity.Query.Products == nil {
@@ -1430,6 +1437,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Shop.Slogan(childComplexity), true
 
+	case "Shop.type":
+		if e.complexity.Shop.Type == nil {
+			break
+		}
+
+		return e.complexity.Shop.Type(childComplexity), true
+
+	case "Shop.type_id":
+		if e.complexity.Shop.TypeID == nil {
+			break
+		}
+
+		return e.complexity.Shop.TypeID(childComplexity), true
+
 	case "Shop.updatedAt":
 		if e.complexity.Shop.UpdatedAt == nil {
 			break
@@ -1478,6 +1499,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ShopShippingVendor.VendorID(childComplexity), true
+
+	case "ShopType.id":
+		if e.complexity.ShopType.ID == nil {
+			break
+		}
+
+		return e.complexity.ShopType.ID(childComplexity), true
+
+	case "ShopType.name":
+		if e.complexity.ShopType.Name == nil {
+			break
+		}
+
+		return e.complexity.ShopType.Name(childComplexity), true
 
 	case "ShopVoucher.createdAt":
 		if e.complexity.ShopVoucher.CreatedAt == nil {
@@ -2162,15 +2197,25 @@ type ProductImage{
     url: String!
 }
 
+input Filter{
+    type: [String]
+    location: [String]
+    minPrice: Int
+    maxPrice: Int
+    courier: [String]
+    rating: [Int]
+    shippingTime: [Int]
+    productAdded: [String]   
+}
+
 extend type Query{
     products: [Product!]!
     getProductById(id: Int!): Product!
     getProductsByShop(shopID: Int!): [Product!]!
     getProductsTopDisc: [Product!]!
     getProductsByCategories(categoryId: Int!): [Product!]!
-    getProductsSearch(search: String!): [Product!]!
-    getProductOrder(by: String!, order:String!): [Product!]!
-    getProductFilter(by: String!, value: String!): [Product!]!
+    getProductsSearch(search: String!, sort: String, input: Filter): [Product!]!
+    getProductsMatch(search: String!): [Product!]!
 }`, BuiltIn: false},
 	{Name: "graph/request.graphqls", Input: `type Request {
     id: Int!
@@ -2222,9 +2267,14 @@ type ReviewReply{
 }
 
 extend type Query{
-    getVendorByShop(shopId: Int!): [ShippingVendor]
+    getVendorByProduct(productId: Int!): [ShippingVendor]
 }`, BuiltIn: false},
-	{Name: "graph/shop.graphqls", Input: `type Shop{
+	{Name: "graph/shop.graphqls", Input: `type ShopType{
+    id: Int!
+    name: String!
+}
+
+type Shop{
     id: Int!
     user_id: Int!
     name: String!
@@ -2238,6 +2288,9 @@ extend type Query{
     address: String!
     phoneNumber: String!
     
+
+    type_id: Int!
+    type: ShopType!
     badges_id: Int!
     badges: Badges!
     product: [Product]
@@ -2292,6 +2345,7 @@ extend type Mutation{
 
 extend type Query{
     getShopByProduct(productId: Int!): Shop!
+    getShopMatch(search: String!): Shop!
 }`, BuiltIn: false},
 	{Name: "graph/transaction.graphqls", Input: `type TransactionHeader{
     id: Int!
@@ -2412,7 +2466,7 @@ type Mutation {
 }
 
 extend type Query{
-    getVoucherByShop(shopId: Int!): [Voucher]
+    getVoucherByProduct(productId: Int!): [Voucher]
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -2574,54 +2628,6 @@ func (ec *executionContext) field_Query_getProductById_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getProductFilter_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["by"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("by"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["by"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["value"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["value"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_getProductOrder_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["by"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("by"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["by"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["order"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["order"] = arg1
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_getProductsByCategories_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2652,6 +2658,21 @@ func (ec *executionContext) field_Query_getProductsByShop_args(ctx context.Conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_getProductsMatch_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["search"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["search"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_getProductsSearch_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2664,6 +2685,24 @@ func (ec *executionContext) field_Query_getProductsSearch_args(ctx context.Conte
 		}
 	}
 	args["search"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["sort"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sort"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sort"] = arg1
+	var arg2 *model.Filter
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg2, err = ec.unmarshalOFilter2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg2
 	return args, nil
 }
 
@@ -2679,6 +2718,21 @@ func (ec *executionContext) field_Query_getShopByProduct_args(ctx context.Contex
 		}
 	}
 	args["productId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getShopMatch_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["search"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["search"] = arg0
 	return args, nil
 }
 
@@ -2766,33 +2820,33 @@ func (ec *executionContext) field_Query_getUserByID_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getVendorByShop_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_getVendorByProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := rawArgs["shopId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("shopId"))
+	if tmp, ok := rawArgs["productId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productId"))
 		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["shopId"] = arg0
+	args["productId"] = arg0
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getVoucherByShop_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_getVoucherByProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := rawArgs["shopId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("shopId"))
+	if tmp, ok := rawArgs["productId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productId"))
 		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["shopId"] = arg0
+	args["productId"] = arg0
 	return args, nil
 }
 
@@ -5793,7 +5847,7 @@ func (ec *executionContext) _Query_getProductsSearch(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetProductsSearch(rctx, args["search"].(string))
+		return ec.resolvers.Query().GetProductsSearch(rctx, args["search"].(string), args["sort"].(*string), args["input"].(*model.Filter))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5810,7 +5864,7 @@ func (ec *executionContext) _Query_getProductsSearch(ctx context.Context, field 
 	return ec.marshalNProduct2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐProductᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getProductOrder(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getProductsMatch(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5827,7 +5881,7 @@ func (ec *executionContext) _Query_getProductOrder(ctx context.Context, field gr
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getProductOrder_args(ctx, rawArgs)
+	args, err := ec.field_Query_getProductsMatch_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -5835,7 +5889,7 @@ func (ec *executionContext) _Query_getProductOrder(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetProductOrder(rctx, args["by"].(string), args["order"].(string))
+		return ec.resolvers.Query().GetProductsMatch(rctx, args["search"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5852,7 +5906,7 @@ func (ec *executionContext) _Query_getProductOrder(ctx context.Context, field gr
 	return ec.marshalNProduct2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐProductᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getProductFilter(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getVendorByProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5869,7 +5923,7 @@ func (ec *executionContext) _Query_getProductFilter(ctx context.Context, field g
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getProductFilter_args(ctx, rawArgs)
+	args, err := ec.field_Query_getVendorByProduct_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -5877,49 +5931,7 @@ func (ec *executionContext) _Query_getProductFilter(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetProductFilter(rctx, args["by"].(string), args["value"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Product)
-	fc.Result = res
-	return ec.marshalNProduct2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐProductᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_getVendorByShop(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getVendorByShop_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetVendorByShop(rctx, args["shopId"].(int))
+		return ec.resolvers.Query().GetVendorByProduct(rctx, args["productId"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5975,7 +5987,7 @@ func (ec *executionContext) _Query_getShopByProduct(ctx context.Context, field g
 	return ec.marshalNShop2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShop(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getVoucherByShop(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getShopMatch(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5992,7 +6004,7 @@ func (ec *executionContext) _Query_getVoucherByShop(ctx context.Context, field g
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getVoucherByShop_args(ctx, rawArgs)
+	args, err := ec.field_Query_getShopMatch_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -6000,7 +6012,49 @@ func (ec *executionContext) _Query_getVoucherByShop(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetVoucherByShop(rctx, args["shopId"].(int))
+		return ec.resolvers.Query().GetShopMatch(rctx, args["search"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Shop)
+	fc.Result = res
+	return ec.marshalNShop2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShop(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getVoucherByProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getVoucherByProduct_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetVoucherByProduct(rctx, args["productId"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7622,6 +7676,76 @@ func (ec *executionContext) _Shop_phoneNumber(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Shop_type_id(ctx context.Context, field graphql.CollectedField, obj *model.Shop) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Shop",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TypeID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Shop_type(ctx context.Context, field graphql.CollectedField, obj *model.Shop) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Shop",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ShopType)
+	fc.Result = res
+	return ec.marshalNShopType2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShopType(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Shop_badges_id(ctx context.Context, field graphql.CollectedField, obj *model.Shop) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -8002,6 +8126,76 @@ func (ec *executionContext) _ShopShippingVendor_vendor(ctx context.Context, fiel
 	res := resTmp.(*model.ShippingVendor)
 	fc.Result = res
 	return ec.marshalNShippingVendor2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShippingVendor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ShopType_id(ctx context.Context, field graphql.CollectedField, obj *model.ShopType) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ShopType",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ShopType_name(ctx context.Context, field graphql.CollectedField, obj *model.ShopType) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ShopType",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ShopVoucher_shop_id(ctx context.Context, field graphql.CollectedField, obj *model.ShopVoucher) (ret graphql.Marshaler) {
@@ -11732,6 +11926,85 @@ func (ec *executionContext) unmarshalInputCreateShop(ctx context.Context, obj in
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputFilter(ctx context.Context, obj interface{}) (model.Filter, error) {
+	var it model.Filter
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			it.Type, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "location":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
+			it.Location, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "minPrice":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("minPrice"))
+			it.MinPrice, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "maxPrice":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maxPrice"))
+			it.MaxPrice, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "courier":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courier"))
+			it.Courier, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "rating":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rating"))
+			it.Rating, err = ec.unmarshalOInt2ᚕᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "shippingTime":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("shippingTime"))
+			it.ShippingTime, err = ec.unmarshalOInt2ᚕᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "productAdded":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productAdded"))
+			it.ProductAdded, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateShop(ctx context.Context, obj interface{}) (model.UpdateShop, error) {
 	var it model.UpdateShop
 	asMap := map[string]interface{}{}
@@ -12643,7 +12916,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "getProductOrder":
+		case "getProductsMatch":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -12651,13 +12924,13 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getProductOrder(ctx, field)
+				res = ec._Query_getProductsMatch(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
-		case "getProductFilter":
+		case "getVendorByProduct":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -12665,21 +12938,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getProductFilter(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "getVendorByShop":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getVendorByShop(ctx, field)
+				res = ec._Query_getVendorByProduct(ctx, field)
 				return res
 			})
 		case "getShopByProduct":
@@ -12696,7 +12955,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "getVoucherByShop":
+		case "getShopMatch":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -12704,7 +12963,21 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getVoucherByShop(ctx, field)
+				res = ec._Query_getShopMatch(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getVoucherByProduct":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getVoucherByProduct(ctx, field)
 				return res
 			})
 		case "__type":
@@ -13038,6 +13311,16 @@ func (ec *executionContext) _Shop(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "type_id":
+			out.Values[i] = ec._Shop_type_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "type":
+			out.Values[i] = ec._Shop_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "badges_id":
 			out.Values[i] = ec._Shop_badges_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -13109,6 +13392,38 @@ func (ec *executionContext) _ShopShippingVendor(ctx context.Context, sel ast.Sel
 			}
 		case "vendor":
 			out.Values[i] = ec._ShopShippingVendor_vendor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var shopTypeImplementors = []string{"ShopType"}
+
+func (ec *executionContext) _ShopType(ctx context.Context, sel ast.SelectionSet, obj *model.ShopType) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, shopTypeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ShopType")
+		case "id":
+			out.Values[i] = ec._ShopType_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._ShopType_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -14238,6 +14553,16 @@ func (ec *executionContext) marshalNShop2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑ
 	return ec._Shop(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNShopType2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShopType(ctx context.Context, sel ast.SelectionSet, v *model.ShopType) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ShopType(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -14691,6 +15016,65 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
+func (ec *executionContext) unmarshalOFilter2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐFilter(ctx context.Context, v interface{}) (*model.Filter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOInt2ᚕᚖint(ctx context.Context, v interface{}) ([]*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*int, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOInt2ᚖint(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOInt2ᚕᚖint(ctx context.Context, sel ast.SelectionSet, v []*int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOInt2ᚖint(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalInt(*v)
+}
+
 func (ec *executionContext) marshalOProduct2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐProduct(ctx context.Context, sel ast.SelectionSet, v []*model.Product) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -14794,6 +15178,42 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	return graphql.MarshalString(v)
+}
+
+func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

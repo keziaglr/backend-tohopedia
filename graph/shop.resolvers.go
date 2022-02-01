@@ -20,6 +20,12 @@ func (r *mutationResolver) UpdateShop(ctx context.Context, id int, input model.U
 
 func (r *queryResolver) GetShopByProduct(ctx context.Context, productID int) (*model.Shop, error) {
 	var shop *model.Shop
-	r.DB.Preload("Product", "id=?", productID).First(&shop)
+	r.DB.Table("shops").Select("shops.*").Joins("join shop_product on shops.id = shop_product.shop_id").Where("shop_product.product_id=?", productID).Scan(&shop)
+	return shop, nil
+}
+
+func (r *queryResolver) GetShopMatch(ctx context.Context, search string) (*model.Shop, error) {
+	var shop *model.Shop
+	r.DB.Select("shops.*").Table("products").Joins("join shop_product on products.id = shop_product.product_id").Joins("join shops on shops.id = shop_product.shop_id").Where("products.name LIKE ?", "%"+search+"%").Group("shops.name").Order("COUNT(DISTINCT products.id) desc").Scan(&shop)
 	return shop, nil
 }

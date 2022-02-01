@@ -75,6 +75,7 @@ func migrate(){
 		&model.ProductImage{}, 
 		&model.Product{},
 		&model.User{}, 
+		&model.ShopType{},
 		&model.Shop{}, 
 		&model.ShopShippingVendor{},
 		&model.ShopVoucher{},
@@ -105,6 +106,7 @@ func migrate(){
 		&model.ProductImage{}, 
 		&model.Product{},
 		&model.User{}, 
+		&model.ShopType{},
 		&model.Shop{},
 		&model.ShopShippingVendor{},
 		&model.ShopVoucher{},
@@ -345,6 +347,16 @@ func seedMaster() {
 			EndTime: time.Now().Add(15),
 		},
 	}
+
+	shopType := []model.ShopType{
+		{
+			Name: "Official Store"
+		}, {
+			Name: "Power Merchant Pro"
+		}, {
+			Name: "Power Merchant"
+		}
+	}
 	
 	shop := []model.Shop{
 		{
@@ -352,6 +364,7 @@ func seedMaster() {
 			Name: "iBox",
 			NameSlug: "iBox Official",
 			Points: 20,
+			TypeID: 1,
 			Image: "https://cf.shopee.co.id/file/eb88e2ccea222edb18618943dc4807ab",
 			OperationalStatus: "Open",
 			OperationalHour: "09.00 - 15.00",
@@ -530,6 +543,7 @@ func seedMaster() {
 			Name: "IKEA",
 			NameSlug: "IKEA Home Furnishing",
 			Points: 70,
+			TypeID: 2,
 			Image: "https://static.au-catalogue-24.com/image/shop/ikea/logo_512.png",
 			OperationalStatus: "Open",
 			OperationalHour: "07.00 - 21.00",
@@ -654,6 +668,7 @@ func seedMaster() {
 			Name: "BeautyLab",
 			NameSlug: "BeautyLab Official",
 			Points: 110,
+			TypeID: 3,
 			Image: "https://1.bp.blogspot.com/-qb6SULBLCZo/X36Ujrsw9xI/AAAAAAAAAzk/-a5NX3xr2t41q3iGz64DdEpCR7M-wul-gCLcBGAsYHQ/s2048/1602121956049.png",
 			OperationalStatus: "Open",
 			OperationalHour: "06.00 - 15.00",
@@ -835,6 +850,7 @@ func seedMaster() {
 	db.Create(&voucher)
 	db.Create(&category)
 	db.Create(&user)
+	db.Create(&shopType)
 	db.Create(&subCategory)
 	db.Create(&shop)
 	db.Create(&shopVendor)
