@@ -10,6 +10,7 @@ type Voucher struct {
 	Description  string    `json:"description"`
 	DiscountRate int       `json:"discountRate"`
 	Tnc          string    `json:"tnc"`
+	Code 		string 		`json:"code"`
 	StartTime    time.Time `json:"startTime"`
 	EndTime      time.Time `json:"endTime"`
 }

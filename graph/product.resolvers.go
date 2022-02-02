@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -37,12 +36,13 @@ func (r *queryResolver) GetProductsTopDisc(ctx context.Context) ([]*model.Produc
 }
 
 func (r *queryResolver) GetProductsByCategories(ctx context.Context, categoryID int) ([]*model.Product, error) {
-	panic(fmt.Errorf("not implemented"))
+	var products []*model.Product
+	r.DB.Select("products.*").Table("products").Joins("join sub_categories on products.sub_category_id = sub_categories.id").Where("sub_categories.category_id = ?", categoryID).Preload("Images").Find(&products)
+	return products, nil
 }
 
 func (r *queryResolver) GetProductsSearch(ctx context.Context, search string, sort *string, input *model.Filter) ([]*model.Product, error) {
 	var products []*model.Product
-	// var shops []*model.Shop
 	var name = "%" + search + "%"
 	var temp = r.DB.Select("DISTINCT products.*").Table("shops").Joins("join shop_product on shops.id = shop_product.shop_id").Joins("join products on products.id = shop_product.product_id").Joins("join product_image on products.id = product_image.product_id").Joins("join product_images on product_images.id = product_image.product_image_id").Joins("join shop_shipping_vendors on shop_shipping_vendors.shop_id = shops.id").Joins("join shipping_vendors on shop_shipping_vendors.vendor_id = shipping_vendors.id")
 
@@ -111,5 +111,11 @@ func (r *queryResolver) GetProductsMatch(ctx context.Context, search string) ([]
 		by = "name = '$" + search + "'"
 	}
 	r.DB.Limit(3).Where("name LIKE ?", name).Order(by + " DESC").Preload("Images").Find(&products)
+	return products, nil
+}
+
+func (r *queryResolver) GetBestSellingProducts(ctx context.Context, shopID int) ([]*model.Product, error) {
+	var products []*model.Product
+	r.DB.Limit(10).Select("DISTINCT products.*").Table("products").Joins("join shop_product on shop_product.product_id = products.id").Where("shop_product.product_id = ?", shopID).Preload("Images").Order("sold_count ASC").Find(&products)
 	return products, nil
 }

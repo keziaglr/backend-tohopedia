@@ -11,6 +11,7 @@ type User struct {
 	Password        string    `json:"password"`
 	Dob             string    `json:"dob"`
 	Gender          string    `json:"gender"`
+	Balance 	int			`json:"balance"`
 	PhoneNumber     string    `json:"phoneNumber"`
 	ProfilePicture  string    `json:"profilePicture"`
 	IsSuspend       bool      `json:"isSuspend"`

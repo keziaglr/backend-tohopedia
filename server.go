@@ -389,7 +389,7 @@ func seedMaster() {
 						{
 							URL: "https://static.bmdstatic.com/pk/product/medium/600fc3d770293.jpg",
 						},{
-							URL: "https://cdn.medcom.id/images/content/2022/01/25/1381007/pKZzQ6uyCr.jpg",
+							URL: "https://images.tokopedia.net/img/cache/500-square/attachment/2019/11/26/157476048801524/157476048801524_5f7a2237-88d9-4d63-910c-1b258f48edec.png",
 						},
 					},
 				},{
@@ -405,7 +405,7 @@ func seedMaster() {
 					SubCategoryID:5,
 					Images: []*model.ProductImage{
 						{
-							URL: "https://www.notebookcheck.net/fileadmin/Notebooks/News/_nc3/iphone_12_pro_iphone_12_iphone_11_battery_life.jpg",
+							URL: "https://www.reliancedigital.in/medias/Apple-iPhone-13-Smartphone-491997700-i-5-1200Wx1200H?context=bWFzdGVyfGltYWdlc3wzMzAzN3xpbWFnZS9qcGVnfGltYWdlcy9oODAvaGExLzk2MzQ2MDc4MjQ5MjYuanBnfGMxZDAxNTMzOWEwNTA1YjQ3NWRmYzM3M2VmNWU3Zjk2OTExMGU1OTViNjlhOTZhNzhjZTA5ZWQwMTIzMzFkOWE",
 						},{
 							URL: "https://cdn.lumen.id/commerce/digimap/file/a4aa2367-2527-4a98-9b61-2db0468ba61c/PDP-iPhone-13-Pink-4-medium.jpeg",
 						},
@@ -423,9 +423,9 @@ func seedMaster() {
 					SubCategoryID:5,
 					Images: []*model.ProductImage{
 						{
-							URL: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//99/MTA-8107982/apple_iphone_11_64gb_full01_ge72ewvv.jpg",
+							URL: "https://www.unbox.id/wp-content/uploads/2022/01/8b1f9e81-d44f-407f-ad73-b04c39d07489-iphone-12-mini-select-2021.jpeg",
 						},{
-							URL: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/refurb-iphone-11-pro-gold-2019?wid=2000&hei=2000&fmt=jpeg&qlt=80&.v=1611101491000",
+							URL: "https://storage.googleapis.com/sirclo-prod-storefront/products/0638265b-41ef-494c-8f47-28cc9e55ee87-iphone-12-pro-family-hero-all.jpeg",
 						},
 					},
 				},{
@@ -441,9 +441,9 @@ func seedMaster() {
 					SubCategoryID:5,
 					Images: []*model.ProductImage{
 						{
-							URL: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//96/MTA-3567047/apple_apple-iphone-x-64-gb-smartphone_full05.jpg",
+							URL: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//99/MTA-8107982/apple_iphone_11_64gb_full01_ge72ewvv.jpg",
 						},{
-							URL: "https://images.tokopedia.net/img/cache/500-square/product-1/2019/5/3/60479447/60479447_b59bd146-2fd3-4c6c-80fe-0fc18fae89fb_529_529",
+							URL: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/refurb-iphone-11-pro-gold-2019?wid=2000&hei=2000&fmt=jpeg&qlt=80&.v=1611101491000",
 						},
 					},
 				},{
@@ -459,9 +459,9 @@ func seedMaster() {
 					SubCategoryID:5,
 					Images: []*model.ProductImage{
 						{
-							URL: "https://id-live-05.slatic.net/original/35fd56ea9616f0353f925169c8950e96.jpg_720x720q80.jpg_.webp",
+							URL: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//96/MTA-3567047/apple_apple-iphone-x-64-gb-smartphone_full05.jpg",
 						},{
-							URL: "https://id-live-05.slatic.net/p/ea1b93cbd237ecef42d4b90978134b38.jpg_720x720q80.jpg_.webp",
+							URL: "https://images.tokopedia.net/img/cache/500-square/product-1/2019/5/3/60479447/60479447_b59bd146-2fd3-4c6c-80fe-0fc18fae89fb_529_529",
 						},
 					},
 				},{
@@ -477,9 +477,9 @@ func seedMaster() {
 					SubCategoryID:5,
 					Images: []*model.ProductImage{
 						{
-							URL: "https://cdn.alloallo.media/catalog/product/apple/iphone/iphone-7/iphone-7-black.jpg",
+							URL: "https://id-live-05.slatic.net/original/35fd56ea9616f0353f925169c8950e96.jpg_720x720q80.jpg_.webp",
 						},{
-							URL: "https://jualku.com/wp-content/uploads/2019/05/apple-iphone-7-2.jpg",
+							URL: "https://id-live-05.slatic.net/p/ea1b93cbd237ecef42d4b90978134b38.jpg_720x720q80.jpg_.webp",
 						},
 					},
 				},{
@@ -495,9 +495,9 @@ func seedMaster() {
 					SubCategoryID:5,
 					Images: []*model.ProductImage{
 						{
-							URL: "https://support.apple.com/library/APPLE/APPLECARE_ALLGEOS/SP705/SP705-iphone_6-mul.png",
+							URL: "https://cdn.alloallo.media/catalog/product/apple/iphone/iphone-7/iphone-7-black.jpg",
 						},{
-							URL: "https://m.media-amazon.com/images/I/51+K8pddvbS._AC_SX679_.jpg",
+							URL: "https://jualku.com/wp-content/uploads/2019/05/apple-iphone-7-2.jpg",
 						},
 					},
 				},{
@@ -513,9 +513,9 @@ func seedMaster() {
 					SubCategoryID:5,
 					Images: []*model.ProductImage{
 						{
-							URL: "https://d2xjmi1k71iy2m.cloudfront.net/dairyfarm/id/images/185/0818587_PE774509_S4.jpg",
+							URL: "https://support.apple.com/library/APPLE/APPLECARE_ALLGEOS/SP705/SP705-iphone_6-mul.png",
 						},{
-							URL: "https://d2xjmi1k71iy2m.cloudfront.net/dairyfarm/id/images/386/0938667_PE794238_S5.jpg",
+							URL: "https://m.media-amazon.com/images/I/51+K8pddvbS._AC_SX679_.jpg",
 						},
 					},
 				},{

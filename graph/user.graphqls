@@ -5,6 +5,7 @@ type User {
     name: String!
     email: String!
     password: String!
+    balance: Int!
     dob: Date!
     gender: String!
     phoneNumber: String!

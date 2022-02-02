@@ -4,3 +4,7 @@ type Badges{
     endPoint: Int!
     badge: String!
 }
+
+extend type Query{
+    getBadge(poin: Int!): Badges!
+}

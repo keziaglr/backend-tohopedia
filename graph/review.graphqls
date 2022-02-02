@@ -6,6 +6,7 @@ type Review{
     description: String!
     image: String
     status: String!
+    type: String!
 
     user: User!
     product: Product!

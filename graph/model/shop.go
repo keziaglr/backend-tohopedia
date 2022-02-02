@@ -22,10 +22,22 @@ type Shop struct {
 	BadgesID          int               `json:"badges_id"`
 	Badges            *Badges           `json:"badges" gorm:"foreignKey:BadgesID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Product           []*Product        `json:"product" gorm:"many2many:shop_product;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Promo           []*ShopPromo        `json:"promo" gorm:"many2many:shop_promo;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	User              *User             `json:"user" gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	CreatedAt         time.Time         `json:"createdAt"`
 	UpdatedAt         time.Time         `json:"updatedAt"`
 	DeletedAt         time.Time         `json:"deletedAt"`
+}
+
+type ShopPromo struct {
+	ID   int    `json:"id" gorm:"primaryKey"`
+	URL  string `json:"url"`
+	Type string `json:"type"`
+}
+
+type ShopType struct {
+	ID   int    `json:"id" gorm:"primaryKey"`
+	Name string `json:"name"`
 }
 
 type ShopShippingVendor struct {

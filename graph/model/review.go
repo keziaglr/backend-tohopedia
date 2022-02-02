@@ -12,6 +12,7 @@ type Review struct {
 	Score       int       `json:"score"`
 	Description string    `json:"description"`
 	Image       *string   `json:"image"`
+	Type 		*string	`json:"type"`
 	Status      string    `json:"status"`
 	User        *User     `json:"user" gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Product     *Product  `json:"product" gorm:"foreignKey:ProductID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`

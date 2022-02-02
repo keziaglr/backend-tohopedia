@@ -23,11 +23,18 @@ type Shop{
     badges_id: Int!
     badges: Badges!
     product: [Product]
+    promo: [ShopPromo]
     user: User!
 
     createdAt: Time!
     updatedAt: Time!
     deletedAt: Time!
+}
+
+type ShopPromo{
+    id: Int!
+    url: String!
+    type: String!
 }
 
 type ShopShippingVendor{
@@ -75,4 +82,5 @@ extend type Mutation{
 extend type Query{
     getShopByProduct(productId: Int!): Shop!
     getShopMatch(search: String!): Shop!
+    getShopByID(shopId: Int!): Shop!
 }

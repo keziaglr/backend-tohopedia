@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+type Campaign struct {
+	ID  int    `json:"id" gorm:"primaryKey"`
+	URL string `json:"url"`
+}
+
 type Product struct {
 	ID            int             `json:"id" gorm:"primaryKey"`
 	Name          string          `json:"name"`

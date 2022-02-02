@@ -8,11 +8,6 @@ type AuthUser struct {
 	OtpCode  string `json:"otpCode"`
 }
 
-type Campaign struct {
-	ID  int    `json:"id"`
-	URL string `json:"url"`
-}
-
 type CreateShop struct {
 	PhoneNumber string `json:"phoneNumber"`
 	Name        string `json:"name"`
@@ -29,11 +24,6 @@ type Filter struct {
 	Rating       *int      `json:"rating"`
 	ShippingTime *int      `json:"shippingTime"`
 	ProductAdded *int      `json:"productAdded"`
-}
-
-type ShopType struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
 }
 
 type UpdateShop struct {

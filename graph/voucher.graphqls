@@ -3,6 +3,7 @@ type Voucher{
     name: String!
     description: String!
     discountRate: Int!
+    code: String!
     tnc: String!
     startTime: Time!
     endTime: Time!

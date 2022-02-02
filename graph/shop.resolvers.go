@@ -29,3 +29,9 @@ func (r *queryResolver) GetShopMatch(ctx context.Context, search string) (*model
 	r.DB.Select("shops.*").Table("products").Joins("join shop_product on products.id = shop_product.product_id").Joins("join shops on shops.id = shop_product.shop_id").Where("products.name LIKE ?", "%"+search+"%").Group("shops.name").Order("COUNT(DISTINCT products.id) desc").Scan(&shop)
 	return shop, nil
 }
+
+func (r *queryResolver) GetShopByID(ctx context.Context, shopID int) (*model.Shop, error) {
+	var shop *model.Shop
+	r.DB.Where("id = ?", shopID).First(&shop)
+	return shop, nil
+}

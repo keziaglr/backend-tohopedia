@@ -43,4 +43,5 @@ extend type Query{
     getProductsByCategories(categoryId: Int!): [Product!]!
     getProductsSearch(search: String!, sort: String, input: Filter): [Product!]!
     getProductsMatch(search: String!): [Product!]!
+    getBestSellingProducts(shopId: Int!): [Product!]!
 }
