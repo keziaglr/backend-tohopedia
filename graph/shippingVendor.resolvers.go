@@ -9,6 +9,13 @@ import (
 	"github.com/keziaglr/backend-tohopedia/graph/model"
 )
 
+func (r *queryResolver) Vendors(ctx context.Context) ([]*model.ShippingVendor, error) {
+	var vendors []*model.ShippingVendor
+
+	r.DB.Find(&vendors)
+	return vendors, nil
+}
+
 func (r *queryResolver) GetVendorByProduct(ctx context.Context, productID int) ([]*model.ShippingVendor, error) {
 	var vendors []*model.ShippingVendor
 

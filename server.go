@@ -350,12 +350,12 @@ func seedMaster() {
 
 	shopType := []model.ShopType{
 		{
-			Name: "Official Store"
+			Name: "Official Store",
 		}, {
-			Name: "Power Merchant Pro"
+			Name: "Power Merchant Pro",
 		}, {
-			Name: "Power Merchant"
-		}
+			Name: "Power Merchant",
+		},
 	}
 	
 	shop := []model.Shop{
@@ -370,7 +370,7 @@ func seedMaster() {
 			OperationalHour: "09.00 - 15.00",
 			Description: "Desc iBox",
 			Slogan: "Slogan iBox",
-			Address: "Alamat iBox",
+			Address: "Kalimantan",
 			PhoneNumber: "018282292",
 			BadgesID: 1,
 			Product: []*model.Product{
@@ -549,7 +549,7 @@ func seedMaster() {
 			OperationalHour: "07.00 - 21.00",
 			Description: "Desc IKEA",
 			Slogan: "Slogan IKEA",
-			Address: "Alamat IKEA",
+			Address: "Jawa",
 			PhoneNumber: "038838832992",
 			BadgesID: 2,
 			Product: []*model.Product{
@@ -674,7 +674,7 @@ func seedMaster() {
 			OperationalHour: "06.00 - 15.00",
 			Description: "Desc BeautyLab",
 			Slogan: "Slogan BeautyLab",
-			Address: "Alamat BeautyLab",
+			Address: "Sumatra",
 			PhoneNumber: "0283839923",
 			BadgesID: 3,
 			Product: []*model.Product{

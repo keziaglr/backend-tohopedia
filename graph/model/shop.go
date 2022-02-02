@@ -29,14 +29,14 @@ type Shop struct {
 }
 
 type ShopShippingVendor struct {
-	ShopID   int             `json:"shop_id" gorm:"primaryKey"`
+	ShopID   int             `json:"shop_id"`
 	VendorID int             `json:"vendor_id"`
 	Shop     *Shop           `json:"shop" gorm:"foreignKey:ShopID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Vendor   *ShippingVendor `json:"vendor" gorm:"foreignKey:VendorID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type ShopVoucher struct {
-	ShopID    int       `json:"shop_id" gorm:"primaryKey"`
+	ShopID    int       `json:"shop_id"`
 	VoucherID int       `json:"voucher_id"`
 	Shop      *Shop     `json:"shop" gorm:"foreignKey:ShopID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Voucher   *Voucher  `json:"voucher" gorm:"foreignKey:VoucherID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`

@@ -21,14 +21,14 @@ type CreateShop struct {
 }
 
 type Filter struct {
-	Type         []*string `json:"type"`
+	Type         []*int    `json:"type"`
 	Location     []*string `json:"location"`
 	MinPrice     *int      `json:"minPrice"`
 	MaxPrice     *int      `json:"maxPrice"`
-	Courier      []*string `json:"courier"`
-	Rating       []*int    `json:"rating"`
-	ShippingTime []*int    `json:"shippingTime"`
-	ProductAdded []*string `json:"productAdded"`
+	Courier      []*int    `json:"courier"`
+	Rating       *int      `json:"rating"`
+	ShippingTime *int      `json:"shippingTime"`
+	ProductAdded *int      `json:"productAdded"`
 }
 
 type ShopType struct {

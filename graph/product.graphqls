@@ -25,14 +25,14 @@ type ProductImage{
 }
 
 input Filter{
-    type: [String]
+    type: [Int]
     location: [String]
     minPrice: Int
     maxPrice: Int
-    courier: [String]
-    rating: [Int]
-    shippingTime: [Int]
-    productAdded: [String]   
+    courier: [Int]
+    rating: Int
+    shippingTime: Int
+    productAdded: Int   
 }
 
 extend type Query{

@@ -162,6 +162,7 @@ type ComplexityRoot struct {
 		GetVoucherByProduct     func(childComplexity int, productID int) int
 		Products                func(childComplexity int) int
 		Users                   func(childComplexity int) int
+		Vendors                 func(childComplexity int) int
 	}
 
 	Request struct {
@@ -366,6 +367,7 @@ type QueryResolver interface {
 	GetProductsByCategories(ctx context.Context, categoryID int) ([]*model.Product, error)
 	GetProductsSearch(ctx context.Context, search string, sort *string, input *model.Filter) ([]*model.Product, error)
 	GetProductsMatch(ctx context.Context, search string) ([]*model.Product, error)
+	Vendors(ctx context.Context) ([]*model.ShippingVendor, error)
 	GetVendorByProduct(ctx context.Context, productID int) ([]*model.ShippingVendor, error)
 	GetShopByProduct(ctx context.Context, productID int) (*model.Shop, error)
 	GetShopMatch(ctx context.Context, search string) (*model.Shop, error)
@@ -1100,6 +1102,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Users(childComplexity), true
+
+	case "Query.vendors":
+		if e.complexity.Query.Vendors == nil {
+			break
+		}
+
+		return e.complexity.Query.Vendors(childComplexity), true
 
 	case "Request.createdAt":
 		if e.complexity.Request.CreatedAt == nil {
@@ -2198,14 +2207,14 @@ type ProductImage{
 }
 
 input Filter{
-    type: [String]
+    type: [Int]
     location: [String]
     minPrice: Int
     maxPrice: Int
-    courier: [String]
-    rating: [Int]
-    shippingTime: [Int]
-    productAdded: [String]   
+    courier: [Int]
+    rating: Int
+    shippingTime: Int
+    productAdded: Int   
 }
 
 extend type Query{
@@ -2267,6 +2276,7 @@ type ReviewReply{
 }
 
 extend type Query{
+    vendors: [ShippingVendor!]!
     getVendorByProduct(productId: Int!): [ShippingVendor]
 }`, BuiltIn: false},
 	{Name: "graph/shop.graphqls", Input: `type ShopType{
@@ -5904,6 +5914,41 @@ func (ec *executionContext) _Query_getProductsMatch(ctx context.Context, field g
 	res := resTmp.([]*model.Product)
 	fc.Result = res
 	return ec.marshalNProduct2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐProductᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_vendors(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Vendors(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ShippingVendor)
+	fc.Result = res
+	return ec.marshalNShippingVendor2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShippingVendorᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getVendorByProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -11939,7 +11984,7 @@ func (ec *executionContext) unmarshalInputFilter(ctx context.Context, obj interf
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			it.Type, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			it.Type, err = ec.unmarshalOInt2ᚕᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11971,7 +12016,7 @@ func (ec *executionContext) unmarshalInputFilter(ctx context.Context, obj interf
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courier"))
-			it.Courier, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			it.Courier, err = ec.unmarshalOInt2ᚕᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11979,7 +12024,7 @@ func (ec *executionContext) unmarshalInputFilter(ctx context.Context, obj interf
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rating"))
-			it.Rating, err = ec.unmarshalOInt2ᚕᚖint(ctx, v)
+			it.Rating, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11987,7 +12032,7 @@ func (ec *executionContext) unmarshalInputFilter(ctx context.Context, obj interf
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("shippingTime"))
-			it.ShippingTime, err = ec.unmarshalOInt2ᚕᚖint(ctx, v)
+			it.ShippingTime, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11995,7 +12040,7 @@ func (ec *executionContext) unmarshalInputFilter(ctx context.Context, obj interf
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productAdded"))
-			it.ProductAdded, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			it.ProductAdded, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12925,6 +12970,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getProductsMatch(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "vendors":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_vendors(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -14527,6 +14586,50 @@ func (ec *executionContext) marshalNReview2ᚖgithubᚗcomᚋkeziaglrᚋbackend�
 		return graphql.Null
 	}
 	return ec._Review(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNShippingVendor2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShippingVendorᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ShippingVendor) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNShippingVendor2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShippingVendor(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNShippingVendor2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShippingVendor(ctx context.Context, sel ast.SelectionSet, v *model.ShippingVendor) graphql.Marshaler {
