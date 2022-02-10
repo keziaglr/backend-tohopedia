@@ -32,6 +32,10 @@ func (r *queryResolver) GetShopMatch(ctx context.Context, search string) (*model
 
 func (r *queryResolver) GetShopByID(ctx context.Context, shopID int) (*model.Shop, error) {
 	var shop *model.Shop
-	r.DB.Where("id = ?", shopID).First(&shop)
+	r.DB.Where("id = ?", shopID).Preload("Promo").First(&shop)
 	return shop, nil
+}
+
+func (r *queryResolver) GetPromoByShop(ctx context.Context, shopID int) ([]*model.ShopPromo, error) {
+	panic(fmt.Errorf("not implemented"))
 }

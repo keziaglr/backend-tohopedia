@@ -25,7 +25,7 @@ func (r *queryResolver) GetProductByID(ctx context.Context, id int) (*model.Prod
 
 func (r *queryResolver) GetProductsByShop(ctx context.Context, shopID int) ([]*model.Product, error) {
 	var products []*model.Product
-	r.DB.Joins("ShopType").Joins("Shop").Preload("Product").Preload("ProductImage").Find(&products)
+	r.DB.Select("DISTINCT products.*").Table("products").Joins("join shop_product on shop_product.product_id = products.id").Where("shop_product.shop_id = ?", shopID).Preload("Images").Find(&products)
 	return products, nil
 }
 
@@ -116,6 +116,6 @@ func (r *queryResolver) GetProductsMatch(ctx context.Context, search string) ([]
 
 func (r *queryResolver) GetBestSellingProducts(ctx context.Context, shopID int) ([]*model.Product, error) {
 	var products []*model.Product
-	r.DB.Limit(10).Select("DISTINCT products.*").Table("products").Joins("join shop_product on shop_product.product_id = products.id").Where("shop_product.product_id = ?", shopID).Preload("Images").Order("sold_count ASC").Find(&products)
+	r.DB.Limit(10).Select("DISTINCT products.*").Table("products").Joins("join shop_product on shop_product.product_id = products.id").Where("shop_product.shop_id = ?", shopID).Preload("Images").Order("sold_count DESC").Find(&products)
 	return products, nil
 }

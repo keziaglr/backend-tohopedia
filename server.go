@@ -75,6 +75,7 @@ func migrate(){
 		&model.ProductImage{}, 
 		&model.Product{},
 		&model.User{}, 
+		&model.ShopPromo{},
 		&model.ShopType{},
 		&model.Shop{}, 
 		&model.ShopShippingVendor{},
@@ -95,7 +96,7 @@ func migrate(){
 		&model.TransactionDetail{},
 	)
 	
-	db.Exec("DROP TABLE product_images, shop_product, user_wishlist, user_voucher")
+	db.Exec("DROP TABLE shop_promo, product_image")
 	db.AutoMigrate(
 		&model.Campaign{},
 		&model.ShippingVendor{},
@@ -106,6 +107,7 @@ func migrate(){
 		&model.ProductImage{}, 
 		&model.Product{},
 		&model.User{}, 
+		&model.ShopPromo{},
 		&model.ShopType{},
 		&model.Shop{},
 		&model.ShopShippingVendor{},
@@ -372,6 +374,16 @@ func seedMaster() {
 			Slogan: "Slogan iBox",
 			Address: "Kalimantan",
 			PhoneNumber: "018282292",
+			Video: "kQcq3rpne78",
+			Promo: []*model.ShopPromo{
+				{
+					Idx: 1,
+					URL: "https://media.idownloadblog.com/wp-content/uploads/2018/04/Apple-switch-to-iphone-ads.jpg",
+				},{
+					Idx: 2,
+					URL: "https://www.slashgear.com/wp-content/uploads/2018/04/iphone-switch.jpg",
+				},
+			},
 			BadgesID: 1,
 			Product: []*model.Product{
 				{
@@ -552,6 +564,19 @@ func seedMaster() {
 			Address: "Jawa",
 			PhoneNumber: "038838832992",
 			BadgesID: 2,
+			Video: "UudV1VdFtuQ",
+			Promo: []*model.ShopPromo{
+				{
+					Idx: 1,
+					URL: "https://d3nuqriibqh3vw.cloudfront.net/images/ikeasales3.jpg",
+				},{
+					Idx: 2,
+					URL: "https://d3nuqriibqh3vw.cloudfront.net/images/ikeasales1.jpg",
+				},{
+					Idx: 3,
+					URL: "https://www.appnova.com/-/media/Appnova/Blog/ikea-1-825x583.ashx",
+				},
+			},
 			Product: []*model.Product{
 				{
 					Name: "Sofa",
@@ -677,6 +702,19 @@ func seedMaster() {
 			Address: "Sumatra",
 			PhoneNumber: "0283839923",
 			BadgesID: 3,
+			Video: "YbMzeQ8nPSE",
+			Promo: []*model.ShopPromo{
+				{
+					Idx: 1,
+					URL: "https://i.pinimg.com/originals/e5/7f/75/e57f75075be2698a8c118ec5e4997d33.jpg",
+				},{
+					Idx: 2,
+					URL: "https://i.pinimg.com/originals/08/0b/8e/080b8e323bb32fbcf06b8edf27ac26ae.jpg",
+				},{
+					Idx: 3,
+					URL: "https://i.pinimg.com/originals/e1/ec/3c/e1ec3caf93e116d35b4c47b2a01dd6ee.jpg",
+				},
+			},
 			Product: []*model.Product{
 				{
 					Name: "Body Scrub",
@@ -789,6 +827,11 @@ func seedMaster() {
 		},{
 			ShopID: 2,
 			VendorID: 4,
+		},{	ShopID: 3,
+			VendorID: 1,
+		},{
+			ShopID: 3,
+			VendorID: 2,
 		},
 	}
 
@@ -808,6 +851,12 @@ func seedMaster() {
 		},{
 			ShopID: 2,
 			VoucherID: 1,
+		},{
+			ShopID: 3,
+			VoucherID: 1,
+		},{
+			ShopID: 3,
+			VoucherID: 2,
 		},
 	}
 

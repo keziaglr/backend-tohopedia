@@ -6,5 +6,5 @@ type Badges{
 }
 
 extend type Query{
-    getBadge(poin: Int!): Badges!
+    getBadge(shopID: Int!): Badges!
 }

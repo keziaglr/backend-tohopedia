@@ -12,3 +12,12 @@ type Cart{
     updatedAt: Time!
     deletedAt: Time!
 }
+
+extend type Mutation{
+    createCart(userId: Int!, productId: Int!, qty: Int!, note: String) : Cart!
+    checkout(userId: Int!) : String!
+}
+
+extend type Query{
+    carts(userId: Int!): [Cart]
+}

@@ -18,6 +18,7 @@ type Shop struct {
 	Address           string            `json:"address"`
 	PhoneNumber       string            `json:"phoneNumber"`
 	TypeID			int					`json:"type_id"`
+	Video 			string				`json:"video"`
 	Type			*ShopType			`json:"shop_type" gorm:"foreignKey:TypeID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	BadgesID          int               `json:"badges_id"`
 	Badges            *Badges           `json:"badges" gorm:"foreignKey:BadgesID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
@@ -31,8 +32,8 @@ type Shop struct {
 
 type ShopPromo struct {
 	ID   int    `json:"id" gorm:"primaryKey"`
+	Idx int		`json:"idx"`
 	URL  string `json:"url"`
-	Type string `json:"type"`
 }
 
 type ShopType struct {

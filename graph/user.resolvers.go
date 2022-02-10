@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/keziaglr/backend-tohopedia/graph/generated"
@@ -47,6 +48,7 @@ func (r *mutationResolver) AuthUser(ctx context.Context, input model.AuthUser) (
 	r.DB.Debug().First(&otp, "code=?", input.OtpCode)
 
 	if otp.ID == 0 {
+		fmt.Printf("OTP ID = 0")
 		return nil, nil
 	}
 
@@ -55,6 +57,9 @@ func (r *mutationResolver) AuthUser(ctx context.Context, input model.AuthUser) (
 		return nil, nil
 	}
 
+	if user == nil {
+		fmt.Printf("User nil")
+	}
 	r.DB.Delete(&otp, "code=?", input.OtpCode)
 	return user, nil
 }

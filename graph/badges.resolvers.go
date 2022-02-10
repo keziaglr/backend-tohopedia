@@ -9,8 +9,13 @@ import (
 	"github.com/keziaglr/backend-tohopedia/graph/model"
 )
 
-func (r *queryResolver) GetBadge(ctx context.Context, poin int) (*model.Badges, error) {
+func (r *queryResolver) GetBadge(ctx context.Context, shopID int) (*model.Badges, error) {
 	var badge *model.Badges
-	r.DB.Where("? BETWEEN start_point AND end_point", poin).Find(&badge)
+
+	var shop *model.Shop
+	r.DB.Table("shops").Where("id=?", shopID).Scan(&shop)
+
+	r.DB.Where("? BETWEEN start_point AND end_point", shop.Points).Find(&badge)
+
 	return badge, nil
 }
