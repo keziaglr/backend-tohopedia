@@ -21,7 +21,7 @@ func (r *mutationResolver) CreateOtp(ctx context.Context, email string) (string,
 		ValidTime: time.Now(),
 	}
 	r.DB.Create(&otp)
-	// SendOTP(email, otp.Code)
+	SendOTP(email, otp.Code)
 	return otp.Code, nil
 }
 

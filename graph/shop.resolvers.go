@@ -11,11 +11,37 @@ import (
 )
 
 func (r *mutationResolver) CreateShop(ctx context.Context, input model.CreateShop) (*model.Shop, error) {
-	panic(fmt.Errorf("not implemented"))
+	shop := model.Shop{
+		UserID:      input.UserID,
+		PhoneNumber: input.PhoneNumber,
+		Name:        input.Name,
+		NameSlug:    input.NameSlug,
+		Address:     input.Address,
+		BadgesID:    1,
+		TypeID:      3,
+		Points:      0,
+	}
+
+	r.DB.Create(&shop)
+	return &shop, nil
 }
 
 func (r *mutationResolver) UpdateShop(ctx context.Context, id int, input model.UpdateShop) (*model.Shop, error) {
-	panic(fmt.Errorf("not implemented"))
+	var shop *model.Shop
+	r.DB.Where("id = ?", id).First(&shop)
+
+	if shop != nil {
+		shop.Image = input.ProfilePicture
+		shop.Name = input.Name
+		shop.NameSlug = input.NameSlug
+		shop.Slogan = input.Slogan
+		shop.Description = input.Description
+		shop.OperationalHour = input.OperationalHour
+		shop.OperationalStatus = input.OperationalStatus
+		r.DB.Save(&shop)
+		return shop, nil
+	}
+	return nil, nil
 }
 
 func (r *queryResolver) GetShopByProduct(ctx context.Context, productID int) (*model.Shop, error) {
@@ -38,4 +64,10 @@ func (r *queryResolver) GetShopByID(ctx context.Context, shopID int) (*model.Sho
 
 func (r *queryResolver) GetPromoByShop(ctx context.Context, shopID int) ([]*model.ShopPromo, error) {
 	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) GetShopByUser(ctx context.Context, userID int) (*model.Shop, error) {
+	var shop *model.Shop
+	r.DB.Where("user_id = ?", userID).First(&shop)
+	return shop, nil
 }

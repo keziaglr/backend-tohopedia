@@ -56,6 +56,7 @@ input UpdateUser{
     gender: String!
     email: String!
     phoneNumber: String!
+    address: String!
 }
 
 type Query {

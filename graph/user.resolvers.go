@@ -77,6 +77,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id int, input model.U
 		user.Gender = input.Gender
 		user.Email = input.Email
 		user.PhoneNumber = input.PhoneNumber
+		user.ShippingAddress = input.Address
 		r.DB.Save(&user)
 		return user, nil
 	}

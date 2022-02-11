@@ -11,6 +11,21 @@ import (
 	"github.com/keziaglr/backend-tohopedia/graph/model"
 )
 
+func (r *mutationResolver) InsertProduct(ctx context.Context, name string, categoryID int, images []string, description string, price int, discount *int, metaData *string) (*model.Product, error) {
+	product := model.Product{
+		Name:          name,
+		SubCategoryID: categoryID,
+		Images:        []*model.ProductImage{{URL: images[1]}, {URL: images[2]}},
+		Description:   description,
+		Price:         price,
+		Discount:      *discount,
+		MetaData:      *metaData,
+	}
+
+	r.DB.Create(&product)
+	return &product, nil
+}
+
 func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
 	var products []*model.Product
 	r.DB.Find(&products)

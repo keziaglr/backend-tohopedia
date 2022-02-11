@@ -59,6 +59,7 @@ type ShopVoucher{
 }
 
 input CreateShop{
+    userId: Int!
     phoneNumber: String!
     name: String!
     nameSlug: String!
@@ -85,4 +86,5 @@ extend type Query{
     getShopMatch(search: String!): Shop!
     getShopByID(shopId: Int!): Shop!
     getPromoByShop(shopId: Int!): [ShopPromo]!
+    getShopByUser(userId: Int!): Shop
 }

@@ -9,6 +9,7 @@ type AuthUser struct {
 }
 
 type CreateShop struct {
+	UserID      int    `json:"userId"`
 	PhoneNumber string `json:"phoneNumber"`
 	Name        string `json:"name"`
 	NameSlug    string `json:"nameSlug"`
@@ -43,4 +44,5 @@ type UpdateUser struct {
 	Gender         string `json:"gender"`
 	Email          string `json:"email"`
 	PhoneNumber    string `json:"phoneNumber"`
+	Address        string `json:"address"`
 }

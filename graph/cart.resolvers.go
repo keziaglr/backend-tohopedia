@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/keziaglr/backend-tohopedia/graph/model"
 	"gorm.io/gorm"
@@ -28,10 +27,12 @@ func (r *mutationResolver) CreateCart(ctx context.Context, userID int, productID
 			return &cart1, nil
 		}
 	} else if cart != nil {
-		if qty <= 0 {
+		var cartQty = cart.Qty
+		cartQty += qty
+		if cartQty <= 0 {
 			r.DB.Where("user_id = ? AND product_id = ?", userID, productID).Delete(&cart)
 		} else {
-			cart.Qty = qty
+			cart.Qty = cartQty
 			r.DB.Save(&cart)
 		}
 		return cart, nil
@@ -40,18 +41,34 @@ func (r *mutationResolver) CreateCart(ctx context.Context, userID int, productID
 	return nil, nil
 }
 
-func (r *mutationResolver) Checkout(ctx context.Context, userID int) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) DeleteCart(ctx context.Context, userID int, productID int) (*model.Cart, error) {
+	var cart *model.Cart
+	r.DB.Where("user_id = ? AND product_id = ?", userID, productID).First(&cart)
+
+	if cart != nil {
+		r.DB.Where("user_id = ? AND product_id = ?", userID, productID).Delete(&cart)
+		return cart, nil
+	}
+
+	return nil, nil
+}
+
+func (r *mutationResolver) Checkout(ctx context.Context, userID int, productID []int) (string, error) {
+	var cart *model.Cart
+	r.DB.Where("user_id = ? AND product_id IN ?", userID, productID).Delete(&cart)
+	return "Success Delete", nil
+
+	return "Not Found", nil
 }
 
 func (r *queryResolver) Carts(ctx context.Context, userID int) ([]*model.Product, error) {
 	var products []*model.Product
-	r.DB.Select("DISTINCT products.*").Table("products").Joins("join user_wishlists on user_wishlists.product_id = products.id").Where("user_id = ?", userID).Preload("Images").Find(&products)
+	r.DB.Select("DISTINCT products.*").Table("products").Joins("join carts on carts.product_id = products.id").Where("user_id = ?", userID).Preload("Images").Find(&products)
 	return products, nil
 }
 
 func (r *queryResolver) Carts2(ctx context.Context, userID int) ([]*model.Cart, error) {
 	var carts []*model.Cart
-	r.DB.Select("DISTINCT products.*").Table("products").Joins("join user_wishlists on user_wishlists.product_id = products.id").Where("user_id = ?", userID).Preload("Images").Find(&carts)
+	r.DB.Select("DISTINCT products.*").Table("products").Joins("join carts on carts.product_id = products.id").Where("user_id = ?", userID).Preload("Images").Find(&carts)
 	return carts, nil
 }

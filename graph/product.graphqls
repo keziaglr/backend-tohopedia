@@ -45,3 +45,7 @@ extend type Query{
     getProductsMatch(search: String!): [Product!]!
     getBestSellingProducts(shopId: Int!): [Product!]!
 }
+
+extend type Mutation{
+    insertProduct(name: String!, categoryId: Int!, images: [String!]!, description: String!, price: Int!, discount: Int, metaData: String): Product!
+}
