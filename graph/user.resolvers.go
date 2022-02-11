@@ -5,11 +5,13 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/keziaglr/backend-tohopedia/graph/generated"
 	"github.com/keziaglr/backend-tohopedia/graph/model"
+	"gorm.io/gorm"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.AuthUser) (*model.User, error) {
@@ -111,6 +113,28 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input model.AuthUs
 	return nil, nil
 }
 
+func (r *mutationResolver) CreateWishlist(ctx context.Context, productID int, userID int) (*model.UserWishlist, error) {
+	var wish *model.UserWishlist
+	err := r.DB.Where("user_id = ? AND product_id = ?", userID, productID).First(&wish).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		wishlist := model.UserWishlist{
+			ProductID: productID,
+			UserID:    userID,
+		}
+		r.DB.Create(&wishlist)
+		return &wishlist, nil
+	}
+	return nil, nil
+}
+
+func (r *mutationResolver) DeleteWishlist(ctx context.Context, productID []int, userID int) (*model.UserWishlist, error) {
+	var wishlist *model.UserWishlist
+	r.DB.Where("user_id = ? AND product_id IN ?", userID, productID).Delete(&wishlist)
+
+	return wishlist, nil
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var users []*model.User
 	r.DB.Where("role = ?", "user").Find(&users)
@@ -131,6 +155,27 @@ func (r *queryResolver) GetUserAuth(ctx context.Context, input model.AuthUser) (
 	var user *model.User
 	r.DB.Where("email = ? AND password = ?", input.Email, input.Password).First(&user)
 
+	if user == nil {
+		return nil, nil
+	}
+
+	var otp model.Otp
+	r.DB.Debug().First(&otp, "code=?", input.OtpCode)
+
+	if otp.ID == 0 {
+		fmt.Printf("OTP ID = 0")
+		return nil, nil
+	}
+
+	if time.Since(otp.ValidTime).Minutes() >= 2 {
+		r.DB.Delete(&otp, "code=?", input.OtpCode)
+		return nil, nil
+	}
+
+	if user == nil {
+		fmt.Printf("User nil")
+	}
+	r.DB.Delete(&otp, "code=?", input.OtpCode)
 	return user, nil
 }
 
@@ -146,6 +191,14 @@ func (r *queryResolver) GetUserByEmail(ctx context.Context, email string) (*mode
 	r.DB.Where("email = ?", email).First(&user)
 
 	return user, nil
+}
+
+func (r *queryResolver) GetUserWishlist(ctx context.Context, userID int) ([]*model.Product, error) {
+	var wishlist []*model.Product
+
+	r.DB.Select("DISTINCT products.*").Table("products").Joins("join user_wishlists on user_wishlists.product_id = products.id").Where("user_id = ?", userID).Preload("Images").Find(&wishlist)
+
+	return wishlist, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

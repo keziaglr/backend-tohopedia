@@ -18,3 +18,15 @@ func (r *queryResolver) GetVoucherByProduct(ctx context.Context, productID int) 
 	r.DB.Table("vouchers").Select("vouchers.*").Joins("left join shop_vouchers on vouchers.id = shop_vouchers.voucher_id").Where("shop_vouchers.shop_id=?", shop.ID).Scan(&vouchers)
 	return vouchers, nil
 }
+
+func (r *queryResolver) Vouchers(ctx context.Context) ([]*model.Voucher, error) {
+	var vouchers []*model.Voucher
+	r.DB.Find(&vouchers)
+	return vouchers, nil
+}
+
+func (r *queryResolver) GetVoucherByID(ctx context.Context, voucherID int) (*model.Voucher, error) {
+	var voucher *model.Voucher
+	r.DB.Where("id = ?", voucherID).Find(&voucher)
+	return voucher, nil
+}

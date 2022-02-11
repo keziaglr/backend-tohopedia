@@ -14,10 +14,11 @@ type Cart{
 }
 
 extend type Mutation{
-    createCart(userId: Int!, productId: Int!, qty: Int!, note: String) : Cart!
+    createCart(userId: Int!, productId: Int!, qty: Int!, note: String!) : Cart!
     checkout(userId: Int!) : String!
 }
 
 extend type Query{
-    carts(userId: Int!): [Cart]
+    carts(userId: Int!): [Product]
+    carts2(userId: Int!): [Cart]
 }
