@@ -8,6 +8,11 @@ type AuthUser struct {
 	OtpCode  string `json:"otpCode"`
 }
 
+type CartProduct struct {
+	ProductID []int `json:"productId"`
+	Qty       []int `json:"qty"`
+}
+
 type CreateShop struct {
 	UserID      int    `json:"userId"`
 	PhoneNumber string `json:"phoneNumber"`
@@ -27,6 +32,11 @@ type Filter struct {
 	ProductAdded *int      `json:"productAdded"`
 }
 
+type ShippingAddress struct {
+	ID      int    `json:"id"`
+	Address string `json:"address"`
+}
+
 type UpdateShop struct {
 	ProfilePicture    string `json:"profilePicture"`
 	Name              string `json:"name"`
@@ -38,11 +48,11 @@ type UpdateShop struct {
 }
 
 type UpdateUser struct {
-	ProfilePicture string `json:"profilePicture"`
-	Name           string `json:"name"`
-	Dob            string `json:"dob"`
-	Gender         string `json:"gender"`
-	Email          string `json:"email"`
-	PhoneNumber    string `json:"phoneNumber"`
-	Address        string `json:"address"`
+	ProfilePicture string    `json:"profilePicture"`
+	Name           string    `json:"name"`
+	Dob            string    `json:"dob"`
+	Gender         string    `json:"gender"`
+	Email          string    `json:"email"`
+	PhoneNumber    string    `json:"phoneNumber"`
+	Address        []*string `json:"address"`
 }

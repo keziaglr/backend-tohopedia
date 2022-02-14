@@ -5,518 +5,97 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"time"
 
-	"github.com/keziaglr/backend-tohopedia/graph/generated"
 	"github.com/keziaglr/backend-tohopedia/graph/model"
+	"gorm.io/gorm"
 )
 
-func (r *mutationResolver) CreateUser(ctx context.Context, input model.AuthUser) (*model.User, error) {
-	var otp model.Otp
-	r.DB.Debug().First(&otp, "code=?", input.OtpCode)
+func (r *mutationResolver) CreateCart(ctx context.Context, userID int, productID int, qty int, note string) (*model.Cart, error) {
+	var cart *model.Cart
+	err := r.DB.Where("user_id = ? AND product_id = ?", userID, productID).First(&cart).Error
 
-	if otp.ID == 0 {
-		return nil, nil
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		if qty > 0 {
+			cart1 := model.Cart{
+				UserID:    userID,
+				ProductID: productID,
+				Qty:       qty,
+				Note:      note,
+			}
+			r.DB.Create(&cart1)
+			return &cart1, nil
+		}
+	} else if cart != nil {
+		var cartQty = cart.Qty
+		cartQty += qty
+		if cartQty <= 0 {
+			r.DB.Where("user_id = ? AND product_id = ?", userID, productID).Delete(&cart)
+		} else {
+			cart.Qty = cartQty
+			r.DB.Save(&cart)
+		}
+		return cart, nil
 	}
 
-	if time.Since(otp.ValidTime).Minutes() >= 2 {
-		r.DB.Delete(&otp, "code=?", input.OtpCode)
-		return nil, nil
-	}
-
-	r.DB.Delete(&otp, "code=?", input.OtpCode)
-
-	user := model.User{
-		Email:    input.Email,
-		Password: input.Password,
-	}
-
-	r.DB.Create(&user)
-	return &user, nil
-}
-
-func (r *mutationResolver) UpdateUser(ctx context.Context, id int, input model.UpdateUser) (*model.User, error) {
-	var user *model.User
-	r.DB.Where("id = ?", id).First(&user)
-	
-	if user != nil{
-		user.ProfilePicture = input.ProfilePicture
-		user.Name = input.Name
-		user.Dob = input.Dob
-		user.Gender = input.Gender
-		user.Email = input.Email
-		user.PhoneNumber = input.PhoneNumber
-		r.DB.Save(&user)
-		return user, nil
-	}
-	return nil, nil	
-	
-}
-
-func (r *mutationResolver) ResetPassword(ctx context.Context, email string, password string) (*model.User, error) {
-	var user *model.User
-	r.DB.Where("email = ?", email).First(&user)
-
-	if user == nil {
-		return nil, nil
-	}
-
-	var otp model.Otp
-	r.DB.Debug().First(&otp, "code=?", otpCode)
-
-	if otp.ID == 0 {
-		return nil, nil
-	}
-
-	if time.Since(otp.ValidTime).Minutes() >= 2 {
-		r.DB.Delete(&otp, "code=?", otpCode)
-		return nil, nil
-	}
-
-	r.DB.Delete(&otp, "code=?", input.OtpCode)
-	
-	if user != nil{
-		user.Password = password;
-		r.DB.Save(&user)
-		return user, nil
-	}
 	return nil, nil
 }
 
-func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	var users []*model.User
-	r.DB.Where("role = ?", "user").Find(&users)
-	return users, nil
-}
+func (r *mutationResolver) DeleteCart(ctx context.Context, userID int, productID int) (*model.Cart, error) {
+	var cart *model.Cart
+	r.DB.Where("user_id = ? AND product_id = ?", userID, productID).First(&cart)
 
-func (r *queryResolver) GetUserByEmailPass(ctx context.Context, email string, password string) (*model.User, error) {
-	var user *model.User
-	r.DB.Where("email = ? AND password = ?", email, password).First(&user)
-
-	if user == nil {
-		return nil, nil
-	}
-	return user, nil
-}
-
-func (r *queryResolver) GetUserAuth(ctx context.Context, input model.AuthUser) (*model.User, error) {
-	var user *model.User
-	r.DB.Where("email = ? AND password = ?", input.Email, input.Password).First(&user)
-
-	if user == nil {
-		return nil, nil
+	if cart != nil {
+		r.DB.Where("user_id = ? AND product_id = ?", userID, productID).Delete(&cart)
+		return cart, nil
 	}
 
-	var otp model.Otp
-	r.DB.Debug().First(&otp, "code=?", input.OtpCode)
+	return nil, nil
+}
 
-	if otp.ID == 0 {
-		return nil, nil
+func (r *mutationResolver) Checkout(ctx context.Context, userID int, transactionType string, paymentMethod string, shippingAddress string, paymentDiscount int) (*model.TransactionHeader, error) {
+	var cart *model.Cart
+	r.DB.Where("user_id = ?", userID).Scan(&cart)
+
+	// var productID := cart.Product
+	// var qty := cart.Qty
+
+	transaction := model.TransactionHeader{
+		UserID:          userID,
+		TransactionType: transactionType,
+		TransactionDate: time.Now(),
+		Status:          "Berlangsung",
+		InvoiceNumber:   StringRandom(10),
+		PaymentMethod:   paymentMethod,
+		ShippingAddress: shippingAddress,
+		PaymentDiscount: paymentDiscount,
+		VoucherID:       voucherId,
 	}
 
-	if time.Since(otp.ValidTime).Minutes() >= 2 {
-		r.DB.Delete(&otp, "code=?", input.OtpCode)
-		return nil, nil
-	}
+	// for i := 0; i < len(cart.ProductID)-1; i++ {
+	// 	detail = model.TransactionDetail{
+	// 		ProductID:     cart.ProductID,
+	// 		Qty:           cart.Qty,
+	// 		TransactionID: transaction.ID,
+	// 	}
+	// 	r.DB.Create(&detail)
+	// }
 
-	r.DB.Delete(&otp, "code=?", input.OtpCode)
+	r.DB.Create(&transaction)
+	r.DB.Where("user_id = ? AND product_id IN ?", userID, productID).Delete(&cart)
 
-	return user, nil
+	return &transaction, nil
 }
 
-func (r *queryResolver) GetUserByID(ctx context.Context, id int) (*model.User, error) {
-	var user *model.User
-	r.DB.Where("id = ?", id).First(&user)
-
-	return user, nil
-}
-
-func (r *queryResolver) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
-	var user *model.User
-	r.DB.Where("email = ?", email).First(&user)
-
-	return user, nil
-}
-
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
-
-package model
-
-import (
-	"time"
-)
-
-type Product struct {
-	ID          int             `json:"id" gorm:"primaryKey"`
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	Price       int             `json:"price"`
-	Discount    int             `json:"discount"`
-	MetaData    string          `json:"metaData"`
-	AddedTime   time.Time       `json:"addedTime"`
-	Stock       int             `json:"stock"`
-	Rating      int             `json:"rating"`
-	SubCategoryID  int             `json:"sub_category_id"`
-	SubCategory    *SubCategory    `json:"category" gorm:"foreignKey:SubCategoryID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	CreatedAt   time.Time       `json:"createdAt"`
-	UpdatedAt   time.Time       `json:"updatedAt"`
-	DeletedAt   time.Time       `json:"deletedAt"`
-}
-
-type ProductImage struct {
-	ID        int      `json:"id" gorm:"primaryKey"`
-	ProductID int      `json:"product_id"`
-	URL       string   `json:"url"`
-	Product   *Product `json:"product" gorm:"foreignKey:ProductID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-}
-
-package model
-
-import (
-	"time"
-)
-
-type Shop struct {
-	ID                int               `json:"id"`
-	UserID            int               `json:"user_id"`
-	Name              string            `json:"name"`
-	NameSlug          string            `json:"nameSlug"`
-	Points            int               `json:"points"`
-	Image             string            `json:"image"`
-	OperationalStatus string            `json:"operationalStatus"`
-	OperationalHour   string            `json:"operationalHour"`
-	Description       string            `json:"description"`
-	Slogan            string            `json:"slogan"`
-	Address           string            `json:"address"`
-	PhoneNumber       string            `json:"phoneNumber"`
-	BadgesID          int               `json:"badges_id"`
-	Badges            *Badges           `json:"badges" gorm:"foreignKey:BadgesID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Product           []*Product        `json:"product" gorm:"many2many:shop_product;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	User              *User             `json:"user" gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	CreatedAt         time.Time         `json:"createdAt"`
-	UpdatedAt         time.Time         `json:"updatedAt"`
-	DeletedAt         time.Time         `json:"deletedAt"`
-}
-
-type ShopShippingVendor struct {
-	ShopID   int             `json:"shop_id"`
-	VendorID int             `json:"vendor_id"`
-	Shop     *Shop           `json:"shop" gorm:"foreignKey:ShopID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Vendor   *ShippingVendor `json:"vendor" gorm:"foreignKey:VendorID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-}
-
-package model
-
-import (
-	"time"
-)
-
-type User struct {
-	ID              int        `json:"id" gorm:"primaryKey"`
-	Name            string     `json:"name"`
-	Email           string     `json:"email"`
-	Password        string     `json:"password"`
-	Dob             string     `json:"dob"`
-	Gender          string     `json:"gender"`
-	PhoneNumber     string     `json:"phoneNumber"`
-	ProfilePicture  string     `json:"profilePicture"`
-	IsSuspend       bool       `json:"isSuspend"`
-	ShippingAddress string     `json:"shippingAddress"`
-	Role            string     `json:"role"`
-	Voucher         []*Voucher `json:"voucher" gorm:"many2many:user_voucher;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Wishlist        []*Product `json:"wishlist" gorm:"many2many:user_wishlist;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	CreatedAt       time.Time  `json:"createdAt"`
-	UpdatedAt       time.Time  `json:"updatedAt"`
-	DeletedAt       time.Time  `json:"deletedAt"`
-}
-package model
-
-import (
-	"time"
-)
-
-type User struct {
-	ID              int        `json:"id" gorm:"primaryKey"`
-	Name            string     `json:"name"`
-	Email           string     `json:"email"`
-	Password        string     `json:"password"`
-	Dob             string     `json:"dob"`
-	Gender          string     `json:"gender"`
-	PhoneNumber     string     `json:"phoneNumber"`
-	ProfilePicture  string     `json:"profilePicture"`
-	IsSuspend       bool       `json:"isSuspend"`
-	ShippingAddress string     `json:"shippingAddress"`
-	Role            string     `json:"role"`
-	Voucher         []*Voucher `json:"voucher" gorm:"many2many:user_voucher;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Wishlist        []*Product `json:"wishlist" gorm:"many2many:user_wishlist;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	CreatedAt       time.Time  `json:"createdAt"`
-	UpdatedAt       time.Time  `json:"updatedAt"`
-	DeletedAt       time.Time  `json:"deletedAt"`
-}
-
-package graph
-
-// This file will be automatically regenerated based on the schema, any resolver implementations
-// will be copied through when generating and any unknown code will be moved to the end.
-
-import (
-	"context"
-	"fmt"
-
-	"github.com/keziaglr/backend-tohopedia/graph/generated"
-	"github.com/keziaglr/backend-tohopedia/graph/model"
-)
-
-func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
+func (r *queryResolver) Carts(ctx context.Context, userID int) ([]*model.Product, error) {
 	var products []*model.Product
-	r.DB.Find(&products)
+	r.DB.Select("DISTINCT products.*").Table("products").Joins("join carts on carts.product_id = products.id").Where("user_id = ?", userID).Preload("Images").Find(&products)
 	return products, nil
 }
 
-func (r *queryResolver) GetProductByID(ctx context.Context, id int) (*model.Product, error) {
-	var product *model.Product
-	r.DB.Where("id=?", id).First(&product)
-	return product, nil
+func (r *queryResolver) Carts2(ctx context.Context, userID int) ([]*model.Cart, error) {
+	var carts []*model.Cart
+	r.DB.Select("DISTINCT carts.*").Table("products").Joins("join carts on carts.product_id = products.id").Where("user_id = ?", userID).Preload("Images").Find(&carts)
+	return carts, nil
 }
-
-func (r *queryResolver) GetProductsByShop(ctx context.Context, shopID int) ([]*model.Product, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *queryResolver) GetProductsTopDisc(ctx context.Context) ([]*model.Product, error) {
-	var products []*model.Product
-	r.DB.Limit(15).Order("discount DESC").Preload("Images").Find(&products)
-	return products, nil
-}
-
-func (r *queryResolver) GetProductsByCategories(ctx context.Context, categoryID int) ([]*model.Product, error) {
-	var products []*model.Product
-	r.DB.Where("sub_category_id=?", categoryID).Find(&products)
-	return products, nil
-}
-
-func (r *queryResolver) GetProductsSearch(ctx context.Context, search string) ([]*model.Product, error) {
-	var products []*model.Product
-	r.DB.Where("name LIKE ?", "%name%").Find(&products)
-	return products, nil
-}
-
-func (r *queryResolver) GetProductOrder(ctx context.Context, by string, order string) ([]*model.Product, error) {
-	var products []*model.Product
-	r.DB.Order(by + " " + order).Find(&products)
-	return products, nil
-}
-
-func (r *queryResolver) GetProductFilter(ctx context.Context, by string, value string) ([]*model.Product, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *productResolver) SoldCount(ctx context.Context, obj *model.Product) (int, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *Resolver) Product() generated.ProductResolver { return &productResolver{r} }
-
-type productResolver struct{ *Resolver }
-
-package graph
-
-// This file will be automatically regenerated based on the schema, any resolver implementations
-// will be copied through when generating and any unknown code will be moved to the end.
-
-import (
-	"context"
-	"fmt"
-
-	"github.com/keziaglr/backend-tohopedia/graph/generated"
-	"github.com/keziaglr/backend-tohopedia/graph/model"
-)
-
-func (r *mutationResolver) CreateShop(ctx context.Context, input model.CreateShop) (*model.Shop, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) UpdateShop(ctx context.Context, id int, input model.UpdateShop) (*model.Shop, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *queryResolver) GetShopByProduct(ctx context.Context, productID int) (*model.Shop, error) {
-	var shop *model.Shop
-	r.DB.Table("shops").Select("shops.*").Joins("left join shop_product on shops.id = shop_product.shop_id").Where("shop_product.product_id=?", productID).Scan(&shop)
-	return shop, nil
-}
-
-func (r *queryResolver) GetShopMatch(ctx context.Context, search string) (*model.Shop, error) {
-	var shop *model.Shop
-	r.DB.Select("shops.*").Table("products").Joins("join shop_product on products.id = shop_product.product_id").Joins("join shops on shops.id = shop_product.shop_id").Where("products.name LIKE ?", "%"+search+"%").Group("shops.name").Order("COUNT(DISTINCT products.id) desc").Scan(&shop)
-	return shop, nil
-}
-
-func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
-		var products []*model.Product
-	r.DB.Find(&products)
-	return products, nil
-	}
-
-func (r *queryResolver) GetProductByID(ctx context.Context, id int) (*model.Product, error) {
-		var product *model.Product
-	r.DB.Preload("Images").Where("id=?", id).First(&product)
-	return product, nil
-	}
-
-func (r *queryResolver) GetProductsByShop(ctx context.Context, shopID int) ([]*model.Product, error) {
-		var products []*model.Product
-	db.Joins("ShopType").Joins("Shop").Preload("Product").Preload("ProductImage").Find(&products)
-	return products, nil
-	}
-
-func (r *queryResolver) GetProductsTopDisc(ctx context.Context) ([]*model.Product, error) {
-		var products []*model.Product
-	r.DB.Limit(15).Order("discount DESC").Preload("Images").Find(&products)
-	return products, nil
-	}
-
-func (r *queryResolver) GetProductsByCategories(ctx context.Context, categoryID int) ([]*model.Product, error) {
-		var products []*model.Product
-	r.DB.Where("sub_category_id=?", categoryID).Find(&products)
-	return products, nil
-	}
-
-func (r *queryResolver) GetProductsSearch(ctx context.Context, search string, sort *string, input *model.Filter) ([]*model.Product, error) {
-		var products []*model.Product
-	var name = "%" + search + "%"
-	var temp
-	
-
-	var filters *model.Filter
-	if filters != nil {
-		if input.Type != nil {
-			temp = db.Joins("ShopType").Joins("Shop").Preload("Product").Preload("ProductImage").Find(&products, "shop_type.id IN ?", input.Type)
-		}
-
-	} else {
-		temp = r.DB.Where("name LIKE ?", name).Preload("Images")
-		if strings.Compare(*sort, "suitable") == 0 {
-			var by = ""
-			if strings.Contains(search, " ") {
-				by = "name like '$" + search + "%'"
-			} else {
-				by = "name = '$" + search + "'"
-			}
-			temp.Order(by + " desc")
-		} else if strings.Compare(*sort, "rating") == 0 {
-			temp.Order("rating desc")
-		} else if strings.Compare(*sort, "latest") == 0 {
-			temp.Order("created_at desc")
-		} else if strings.Compare(*sort, "highPrice") == 0 {
-			temp.Order("price desc")
-		} else if strings.Compare(*sort, "lowPrice") == 0 {
-			temp.Order("price asc")
-		}
-		
-	}
-	return products, nil
-	}
-
-func (r *queryResolver) GetProductsMatch(ctx context.Context, search string) ([]*model.Product, error) {
-		var products []*model.Product
-	var name = "%" + search + "%"
-	var by = ""
-	if strings.Contains(search, " ") {
-		by = "name like '$" + search + "%'"
-	} else {
-		by = "name = '$" + search + "'"
-	}
-	r.DB.Limit(3).Where("name LIKE ?", name).Order(by + " DESC").Preload("Images").Find(&products)
-	return products, nil
-
-func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
-		var products []*model.Product
-	r.DB.Find(&products)
-	return products, nil
-	}
-
-func (r *queryResolver) GetProductByID(ctx context.Context, id int) (*model.Product, error) {
-		var product *model.Product
-	r.DB.Preload("Images").Where("id=?", id).First(&product)
-	return product, nil
-	}
-
-func (r *queryResolver) GetProductsByShop(ctx context.Context, shopID int) ([]*model.Product, error) {
-		var products []*model.Product
-	db.Joins("ShopType").Joins("Shop").Preload("Product").Preload("ProductImage").Find(&products)
-	return products, nil
-	}
-
-func (r *queryResolver) GetProductsTopDisc(ctx context.Context) ([]*model.Product, error) {
-		var products []*model.Product
-r.DB.Limit(15).Order("discount DESC").Preload("Images").Find(&products)
-return products, nil
-	}
-
-func (r *queryResolver) GetProductsByCategories(ctx context.Context, categoryID int) ([]*model.Product, error) {
-		var products []*model.Product
-r.DB.Where("sub_category_id=?", categoryID).Find(&products)
-return products, nil
-	}
-
-func (r *queryResolver) GetProductsSearch(ctx context.Context, search string, sort *string, input *model.Filter) ([]*model.Product, error) {
-		var products []*model.Product
-var name = "%" + search + "%"
-var temp
-
-
-var filters *model.Filter
-if filters != nil {
-	if input.Type != nil {
-		temp = db.Joins("ShopType").Joins("Shop").Preload("Product").Preload("ProductImage").Find(&products, "shop_type.id IN ?", input.Type)
-	}
-
-} else {
-	temp = r.DB.Where("name LIKE ?", name).Preload("Images")
-	if strings.Compare(*sort, "suitable") == 0 {
-		var by = ""
-		if strings.Contains(search, " ") {
-			by = "name like '$" + search + "%'"
-		} else {
-			by = "name = '$" + search + "'"
-		}
-		temp.Order(by + " desc")
-	} else if strings.Compare(*sort, "rating") == 0 {
-		temp.Order("rating desc")
-	} else if strings.Compare(*sort, "latest") == 0 {
-		temp.Order("created_at desc")
-	} else if strings.Compare(*sort, "highPrice") == 0 {
-		temp.Order("price desc")
-	} else if strings.Compare(*sort, "lowPrice") == 0 {
-		temp.Order("price asc")
-	}
-	
-}
-return products, nil
-	}
-
-func (r *queryResolver) GetProductsMatch(ctx context.Context, search string) ([]*model.Product, error) {
-		var products []*model.Product
-var name = "%" + search + "%"
-var by = ""
-if strings.Contains(search, " ") {
-	by = "name like '$" + search + "%'"
-} else {
-	by = "name = '$" + search + "'"
-}
-r.DB.Limit(3).Where("name LIKE ?", name).Order(by + " DESC").Preload("Images").Find(&products)
-return products, ni
-	}

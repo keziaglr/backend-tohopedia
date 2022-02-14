@@ -77,7 +77,6 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id int, input model.U
 		user.Gender = input.Gender
 		user.Email = input.Email
 		user.PhoneNumber = input.PhoneNumber
-		user.ShippingAddress = input.Address
 		r.DB.Save(&user)
 		return user, nil
 	}
@@ -182,7 +181,7 @@ func (r *queryResolver) GetUserAuth(ctx context.Context, input model.AuthUser) (
 
 func (r *queryResolver) GetUserByID(ctx context.Context, id int) (*model.User, error) {
 	var user *model.User
-	r.DB.Where("id = ?", id).First(&user)
+	r.DB.Where("id = ?", id).Preload("ShippingAddress").First(&user)
 
 	return user, nil
 }

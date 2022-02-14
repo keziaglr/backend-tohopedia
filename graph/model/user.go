@@ -15,7 +15,7 @@ type User struct {
 	PhoneNumber     string    `json:"phoneNumber"`
 	ProfilePicture  string    `json:"profilePicture"`
 	IsSuspend       bool      `json:"isSuspend"`
-	ShippingAddress string    `json:"shippingAddress"`
+	ShippingAddress []*ShippingAddress `json:"shippingAddress" gorm:"many2many:user_address;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Role            string    `json:"role"`
 	CreatedAt       time.Time `json:"createdAt"`
 	UpdatedAt       time.Time `json:"updatedAt"`

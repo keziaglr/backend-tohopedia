@@ -13,4 +13,9 @@ extend type Query{
     getVoucherByProduct(productId: Int!): [Voucher]
     vouchers: [Voucher!]!
     getVoucherById(voucherId: Int!): Voucher!
+    getVoucherCart(userId: Int!): [Voucher!]!
+}
+
+extend type Mutation{
+    createUserVoucher(voucherId: Int!, userId: Int!): UserVoucher!
 }

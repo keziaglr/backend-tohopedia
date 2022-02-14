@@ -9,6 +9,16 @@ import (
 	"github.com/keziaglr/backend-tohopedia/graph/model"
 )
 
+func (r *mutationResolver) CreateUserVoucher(ctx context.Context, voucherID int, userID int) (*model.UserVoucher, error) {
+	userVoucher := model.UserVoucher{
+		VoucherID: voucherID,
+		UserID:    userID,
+	}
+
+	r.DB.Create(&userVoucher)
+	return &userVoucher, nil
+}
+
 func (r *queryResolver) GetVoucherByProduct(ctx context.Context, productID int) ([]*model.Voucher, error) {
 	var vouchers []*model.Voucher
 
@@ -28,5 +38,11 @@ func (r *queryResolver) Vouchers(ctx context.Context) ([]*model.Voucher, error) 
 func (r *queryResolver) GetVoucherByID(ctx context.Context, voucherID int) (*model.Voucher, error) {
 	var voucher *model.Voucher
 	r.DB.Where("id = ?", voucherID).Find(&voucher)
+	return voucher, nil
+}
+
+func (r *queryResolver) GetVoucherCart(ctx context.Context, userID int) ([]*model.Voucher, error) {
+	var voucher []*model.Voucher
+	r.DB.Table("vouchers").Select("vouchers.*").Joins("join user_vouchers on vouchers.id = user_vouchers.voucher_id").Where("user_vouchers.user_id=?", userID).Scan(&voucher)
 	return voucher, nil
 }

@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/keziaglr/backend-tohopedia/graph/model"
 	"gorm.io/gorm"
@@ -53,12 +54,32 @@ func (r *mutationResolver) DeleteCart(ctx context.Context, userID int, productID
 	return nil, nil
 }
 
-func (r *mutationResolver) Checkout(ctx context.Context, userID int, productID []int) (string, error) {
-	var cart *model.Cart
-	r.DB.Where("user_id = ? AND product_id IN ?", userID, productID).Delete(&cart)
-	return "Success Delete", nil
+func (r *mutationResolver) Checkout(ctx context.Context, userID int, transactionType string, paymentMethod string, shippingAddress string, paymentDiscount int, voucherID *int, shippingID int, input model.CartProduct) (*model.TransactionHeader, error) {
+	transaction := model.TransactionHeader{
+		UserID:          userID,
+		TransactionType: transactionType,
+		TransactionDate: time.Now(),
+		Status:          "Berlangsung",
+		InvoiceNumber:   StringRandom(10),
+		PaymentMethod:   paymentMethod,
+		ShippingAddress: shippingAddress,
+		PaymentDiscount: paymentDiscount,
+		VoucherID:       *voucherID,
+		ShippingID: shippingID,
+	}
+	r.DB.Create(&transaction)
 
-	return "Not Found", nil
+	for i := 0; i < len(input.ProductID); i++ {
+		detail := model.TransactionDetail{
+			ProductID:     input.ProductID[i],
+			Qty:           input.Qty[i],
+			TransactionID: transaction.ID,
+		}
+		r.DB.Create(&detail)
+	}
+	var cart *model.Cart
+	r.DB.Where("user_id = ?", userID).Delete(&cart)
+	return &transaction, nil
 }
 
 func (r *queryResolver) Carts(ctx context.Context, userID int) ([]*model.Product, error) {
@@ -69,6 +90,6 @@ func (r *queryResolver) Carts(ctx context.Context, userID int) ([]*model.Product
 
 func (r *queryResolver) Carts2(ctx context.Context, userID int) ([]*model.Cart, error) {
 	var carts []*model.Cart
-	r.DB.Select("DISTINCT products.*").Table("products").Joins("join carts on carts.product_id = products.id").Where("user_id = ?", userID).Preload("Images").Find(&carts)
+	r.DB.Select("DISTINCT carts.*").Table("products").Joins("join carts on carts.product_id = products.id").Where("user_id = ?", userID).Preload("Images").Find(&carts)
 	return carts, nil
 }

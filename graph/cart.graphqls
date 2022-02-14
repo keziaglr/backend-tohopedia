@@ -13,10 +13,16 @@ type Cart{
     deletedAt: Time!
 }
 
+input CartProduct{
+    productId: [Int!],
+    qty: [Int!]
+}
+
 extend type Mutation{
     createCart(userId: Int!, productId: Int!, qty: Int!, note: String!) : Cart!
     deleteCart(userId: Int!, productId: Int!) : Cart!
-    checkout(userId: Int!, productId: [Int!]!) : String!
+    checkout(userId: Int!, transactionType:String!, paymentMethod:String!, shippingAddress:String!, paymentDiscount: Int!, voucherId: Int, shippingId: Int!, input: CartProduct!) : TransactionHeader!
+    
 }
 
 extend type Query{

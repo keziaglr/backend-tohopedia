@@ -74,6 +74,7 @@ func migrate(){
 		&model.SubCategory{}, 
 		&model.ProductImage{}, 
 		&model.Product{},
+		&model.ShippingAddress{},
 		&model.User{}, 
 		&model.ShopPromo{},
 		&model.ShopType{},
@@ -106,6 +107,7 @@ func migrate(){
 		&model.SubCategory{}, 
 		&model.ProductImage{}, 
 		&model.Product{},
+		&model.ShippingAddress{},
 		&model.User{}, 
 		&model.ShopPromo{},
 		&model.ShopType{},
@@ -145,7 +147,13 @@ func seedMaster() {
 			PhoneNumber: "282892929",
 			ProfilePicture: "https://i.mydramalist.com/vK4lp_5_c.jpg",
 			IsSuspend: false,
-			ShippingAddress: "Kalimantan Barat",
+			ShippingAddress: []*model.ShippingAddress{
+				{
+					Address: "Kalimantan Barat",
+				},{
+					Address: "Jawa Tengah",
+				},
+			},
 			Role: "User",
 		}, {
 			Email: "admin@admin.com",
@@ -156,7 +164,13 @@ func seedMaster() {
 			PhoneNumber: "2992929210",
 			ProfilePicture: "https://awsimages.detik.net.id/community/media/visual/2018/02/15/f91bd7e4-25b5-4ac7-b1a1-4844d3a3b89b.jpeg?w=1200",
 			IsSuspend: false,
-			ShippingAddress: "Jakarta",
+			ShippingAddress: []*model.ShippingAddress{
+				{
+					Address: "Jakarta",
+				},{
+					Address: "Jawa Timur",
+				},
+			},
 			Role: "Admin",
 		}, {
 			Email: "twice@mail.com",
@@ -167,7 +181,13 @@ func seedMaster() {
 			PhoneNumber: "71028392012",
 			ProfilePicture: "https://assets.pikiran-rakyat.com/crop/16x22:716x737/x/photo/2021/09/16/103691333.jpeg",
 			IsSuspend: false,
-			ShippingAddress: "Jawa Timur",
+			ShippingAddress: []*model.ShippingAddress{
+				{
+					Address: "Tangerang",
+				},{
+					Address: "Jakarta",
+				},
+			},
 			Role: "User",
 		}, {
 			Email: "kep1er@mail.com",
@@ -178,7 +198,13 @@ func seedMaster() {
 			PhoneNumber: "038389234",
 			ProfilePicture: "https://staticg.sportskeeda.com/editor/2022/01/b3203-16416582079625-1920.jpg",
 			IsSuspend: false,
-			ShippingAddress: "Depok",
+			ShippingAddress: []*model.ShippingAddress{
+				{
+					Address: "Depok",
+				},{
+					Address: "Jawa Tengah",
+				},
+			},
 			Role: "User",
 		},
 	}
