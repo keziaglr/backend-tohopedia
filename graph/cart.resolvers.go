@@ -92,6 +92,6 @@ func (r *queryResolver) Carts(ctx context.Context, userID int) ([]*model.Product
 
 func (r *queryResolver) Carts2(ctx context.Context, userID int) ([]*model.Cart, error) {
 	var carts []*model.Cart
-	r.DB.Select("DISTINCT carts.*").Table("products").Joins("join carts on carts.product_id = products.id").Where("user_id = ?", userID).Preload("Images").Find(&carts)
+	r.DB.Select("DISTINCT carts.*").Table("products").Joins("join carts on carts.product_id = products.id").Where("user_id = ?", userID).Find(&carts)
 	return carts, nil
 }

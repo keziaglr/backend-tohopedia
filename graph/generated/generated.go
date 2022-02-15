@@ -98,6 +98,12 @@ type ComplexityRoot struct {
 		UpdatedAt func(childComplexity int) int
 	}
 
+	MetaData struct {
+		ID    func(childComplexity int) int
+		Label func(childComplexity int) int
+		Value func(childComplexity int) int
+	}
+
 	Mutation struct {
 		AuthUser          func(childComplexity int, input model.AuthUser) int
 		Checkout          func(childComplexity int, userID int, transactionType string, paymentMethod string, shippingAddress string, paymentDiscount int, voucherID *int, shippingID int, total int, input model.CartProduct) int
@@ -108,9 +114,11 @@ type ComplexityRoot struct {
 		CreateUserVoucher func(childComplexity int, voucherID int, userID int) int
 		CreateWishlist    func(childComplexity int, productID int, userID int) int
 		DeleteCart        func(childComplexity int, userID int, productID int) int
+		DeleteProduct     func(childComplexity int, productID int) int
 		DeleteWishlist    func(childComplexity int, productID []int, userID int) int
-		InsertProduct     func(childComplexity int, name string, categoryID int, images []string, description string, price int, discount *int, metaData *string) int
+		InsertProduct     func(childComplexity int, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) int
 		ResetPassword     func(childComplexity int, input model.AuthUser) int
+		UpdateProduct     func(childComplexity int, productID int, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) int
 		UpdateShop        func(childComplexity int, id int, input model.UpdateShop) int
 		UpdateUser        func(childComplexity int, id int, input model.UpdateUser) int
 	}
@@ -176,6 +184,7 @@ type ComplexityRoot struct {
 		GetUserByEmailPass      func(childComplexity int, email string, password string) int
 		GetUserByID             func(childComplexity int, id int) int
 		GetUserWishlist         func(childComplexity int, userID int) int
+		GetVendorByID           func(childComplexity int, id int) int
 		GetVendorByProduct      func(childComplexity int, productID int) int
 		GetVendorByUser         func(childComplexity int, userID int) int
 		GetVoucherByID          func(childComplexity int, voucherID int) int
@@ -393,7 +402,9 @@ type MutationResolver interface {
 	DeleteCart(ctx context.Context, userID int, productID int) (*model.Cart, error)
 	Checkout(ctx context.Context, userID int, transactionType string, paymentMethod string, shippingAddress string, paymentDiscount int, voucherID *int, shippingID int, total int, input model.CartProduct) (*model.TransactionHeader, error)
 	CreateOtp(ctx context.Context, email string) (string, error)
-	InsertProduct(ctx context.Context, name string, categoryID int, images []string, description string, price int, discount *int, metaData *string) (*model.Product, error)
+	InsertProduct(ctx context.Context, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) (*model.Product, error)
+	UpdateProduct(ctx context.Context, productID int, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) (*model.Product, error)
+	DeleteProduct(ctx context.Context, productID int) (*model.Product, error)
 	CreateShop(ctx context.Context, input model.CreateShop) (*model.Shop, error)
 	UpdateShop(ctx context.Context, id int, input model.UpdateShop) (*model.Shop, error)
 	CreateUserVoucher(ctx context.Context, voucherID int, userID int) (*model.UserVoucher, error)
@@ -422,6 +433,7 @@ type QueryResolver interface {
 	Vendors(ctx context.Context) ([]*model.ShippingVendor, error)
 	GetVendorByProduct(ctx context.Context, productID int) ([]*model.ShippingVendor, error)
 	GetVendorByUser(ctx context.Context, userID int) ([]*model.ShippingVendor, error)
+	GetVendorByID(ctx context.Context, id int) (*model.ShippingVendor, error)
 	GetShopByProduct(ctx context.Context, productID int) (*model.Shop, error)
 	GetShopMatch(ctx context.Context, search string) (*model.Shop, error)
 	GetShopByID(ctx context.Context, shopID int) (*model.Shop, error)
@@ -703,6 +715,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ChatDetail.UpdatedAt(childComplexity), true
 
+	case "MetaData.id":
+		if e.complexity.MetaData.ID == nil {
+			break
+		}
+
+		return e.complexity.MetaData.ID(childComplexity), true
+
+	case "MetaData.label":
+		if e.complexity.MetaData.Label == nil {
+			break
+		}
+
+		return e.complexity.MetaData.Label(childComplexity), true
+
+	case "MetaData.value":
+		if e.complexity.MetaData.Value == nil {
+			break
+		}
+
+		return e.complexity.MetaData.Value(childComplexity), true
+
 	case "Mutation.authUser":
 		if e.complexity.Mutation.AuthUser == nil {
 			break
@@ -811,6 +844,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteCart(childComplexity, args["userId"].(int), args["productId"].(int)), true
 
+	case "Mutation.deleteProduct":
+		if e.complexity.Mutation.DeleteProduct == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteProduct_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteProduct(childComplexity, args["productId"].(int)), true
+
 	case "Mutation.deleteWishlist":
 		if e.complexity.Mutation.DeleteWishlist == nil {
 			break
@@ -833,7 +878,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.InsertProduct(childComplexity, args["name"].(string), args["categoryId"].(int), args["images"].([]string), args["description"].(string), args["price"].(int), args["discount"].(*int), args["metaData"].(*string)), true
+		return e.complexity.Mutation.InsertProduct(childComplexity, args["shopId"].(int), args["name"].(string), args["categoryId"].(int), args["images"].([]string), args["description"].(string), args["price"].(int), args["discount"].(*int), args["input"].(model.InsertMetaData)), true
 
 	case "Mutation.resetPassword":
 		if e.complexity.Mutation.ResetPassword == nil {
@@ -846,6 +891,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ResetPassword(childComplexity, args["input"].(model.AuthUser)), true
+
+	case "Mutation.updateProduct":
+		if e.complexity.Mutation.UpdateProduct == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateProduct_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateProduct(childComplexity, args["productId"].(int), args["shopId"].(int), args["name"].(string), args["categoryId"].(int), args["images"].([]string), args["description"].(string), args["price"].(int), args["discount"].(*int), args["input"].(model.InsertMetaData)), true
 
 	case "Mutation.updateShop":
 		if e.complexity.Mutation.UpdateShop == nil {
@@ -1342,6 +1399,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetUserWishlist(childComplexity, args["userId"].(int)), true
+
+	case "Query.getVendorByID":
+		if e.complexity.Query.GetVendorByID == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getVendorByID_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetVendorByID(childComplexity, args["id"].(int)), true
 
 	case "Query.getVendorByProduct":
 		if e.complexity.Query.GetVendorByProduct == nil {
@@ -2612,7 +2681,6 @@ extend type Mutation {
     description: String!
     price: Int!
     discount: Int!
-    metaData: String!
     addedTime: Time!
     stock: Int!
     rating: Int!
@@ -2620,6 +2688,7 @@ extend type Mutation {
     
     sub_category_id: Int!
     sub_category: SubCategory!
+    metaData: [MetaData!]!
     images: [ProductImage!]!
 
     createdAt: Time!
@@ -2630,6 +2699,12 @@ extend type Mutation {
 type ProductImage{
     id: Int!
     url: String!
+}
+
+type MetaData{
+    id: Int!
+    label: String!
+    value: String!
 }
 
 input Filter{
@@ -2654,8 +2729,15 @@ extend type Query{
     getBestSellingProducts(shopId: Int!): [Product!]!
 }
 
+input InsertMetaData{
+    label: [String]!
+    value: [String]!
+}
+
 extend type Mutation{
-    insertProduct(name: String!, categoryId: Int!, images: [String!]!, description: String!, price: Int!, discount: Int, metaData: String): Product!
+    insertProduct(shopId: Int!, name: String!, categoryId: Int!, images: [String!]!, description: String!, price: Int!, discount: Int, input: InsertMetaData!): Product!
+    updateProduct(productId: Int!, shopId: Int!, name: String!, categoryId: Int!, images: [String!]!, description: String!, price: Int!, discount: Int, input: InsertMetaData!): Product!
+    deleteProduct(productId: Int!): Product
 }`, BuiltIn: false},
 	{Name: "graph/request.graphqls", Input: `type Request {
     id: Int!
@@ -2711,6 +2793,7 @@ extend type Query{
     vendors: [ShippingVendor!]!
     getVendorByProduct(productId: Int!): [ShippingVendor]
     getVendorByUser(userId: Int!): [ShippingVendor]
+    getVendorByID(id: Int!): ShippingVendor!
 }`, BuiltIn: false},
 	{Name: "graph/shop.graphqls", Input: `type ShopType{
     id: Int!
@@ -3223,6 +3306,21 @@ func (ec *executionContext) field_Mutation_deleteCart_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deleteProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["productId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["productId"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_deleteWishlist_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3250,69 +3348,78 @@ func (ec *executionContext) field_Mutation_deleteWishlist_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_insertProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 int
+	if tmp, ok := rawArgs["shopId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("shopId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["shopId"] = arg0
+	var arg1 string
 	if tmp, ok := rawArgs["name"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["name"] = arg0
-	var arg1 int
+	args["name"] = arg1
+	var arg2 int
 	if tmp, ok := rawArgs["categoryId"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("categoryId"))
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["categoryId"] = arg1
-	var arg2 []string
+	args["categoryId"] = arg2
+	var arg3 []string
 	if tmp, ok := rawArgs["images"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("images"))
-		arg2, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
+		arg3, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["images"] = arg2
-	var arg3 string
+	args["images"] = arg3
+	var arg4 string
 	if tmp, ok := rawArgs["description"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-		arg3, err = ec.unmarshalNString2string(ctx, tmp)
+		arg4, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["description"] = arg3
-	var arg4 int
+	args["description"] = arg4
+	var arg5 int
 	if tmp, ok := rawArgs["price"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
-		arg4, err = ec.unmarshalNInt2int(ctx, tmp)
+		arg5, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["price"] = arg4
-	var arg5 *int
+	args["price"] = arg5
+	var arg6 *int
 	if tmp, ok := rawArgs["discount"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discount"))
-		arg5, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		arg6, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["discount"] = arg5
-	var arg6 *string
-	if tmp, ok := rawArgs["metaData"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("metaData"))
-		arg6, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+	args["discount"] = arg6
+	var arg7 model.InsertMetaData
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg7, err = ec.unmarshalNInsertMetaData2githubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐInsertMetaData(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["metaData"] = arg6
+	args["input"] = arg7
 	return args, nil
 }
 
@@ -3328,6 +3435,93 @@ func (ec *executionContext) field_Mutation_resetPassword_args(ctx context.Contex
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["productId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["productId"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["shopId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("shopId"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["shopId"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["name"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg2
+	var arg3 int
+	if tmp, ok := rawArgs["categoryId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("categoryId"))
+		arg3, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["categoryId"] = arg3
+	var arg4 []string
+	if tmp, ok := rawArgs["images"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("images"))
+		arg4, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["images"] = arg4
+	var arg5 string
+	if tmp, ok := rawArgs["description"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+		arg5, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["description"] = arg5
+	var arg6 int
+	if tmp, ok := rawArgs["price"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
+		arg6, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["price"] = arg6
+	var arg7 *int
+	if tmp, ok := rawArgs["discount"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discount"))
+		arg7, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["discount"] = arg7
+	var arg8 model.InsertMetaData
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg8, err = ec.unmarshalNInsertMetaData2githubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐInsertMetaData(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg8
 	return args, nil
 }
 
@@ -3790,6 +3984,21 @@ func (ec *executionContext) field_Query_getUserWishlist_args(ctx context.Context
 		}
 	}
 	args["userId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getVendorByID_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -5160,6 +5369,111 @@ func (ec *executionContext) _ChatDetail_deletedAt(ctx context.Context, field gra
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _MetaData_id(ctx context.Context, field graphql.CollectedField, obj *model.MetaData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MetaData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MetaData_label(ctx context.Context, field graphql.CollectedField, obj *model.MetaData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MetaData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Label, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MetaData_value(ctx context.Context, field graphql.CollectedField, obj *model.MetaData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MetaData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5605,7 +5919,7 @@ func (ec *executionContext) _Mutation_insertProduct(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().InsertProduct(rctx, args["name"].(string), args["categoryId"].(int), args["images"].([]string), args["description"].(string), args["price"].(int), args["discount"].(*int), args["metaData"].(*string))
+		return ec.resolvers.Mutation().InsertProduct(rctx, args["shopId"].(int), args["name"].(string), args["categoryId"].(int), args["images"].([]string), args["description"].(string), args["price"].(int), args["discount"].(*int), args["input"].(model.InsertMetaData))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5620,6 +5934,87 @@ func (ec *executionContext) _Mutation_insertProduct(ctx context.Context, field g
 	res := resTmp.(*model.Product)
 	fc.Result = res
 	return ec.marshalNProduct2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐProduct(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateProduct_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateProduct(rctx, args["productId"].(int), args["shopId"].(int), args["name"].(string), args["categoryId"].(int), args["images"].([]string), args["description"].(string), args["price"].(int), args["discount"].(*int), args["input"].(model.InsertMetaData))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Product)
+	fc.Result = res
+	return ec.marshalNProduct2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐProduct(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteProduct_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteProduct(rctx, args["productId"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Product)
+	fc.Result = res
+	return ec.marshalOProduct2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐProduct(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createShop(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -6168,41 +6563,6 @@ func (ec *executionContext) _Product_discount(ctx context.Context, field graphql
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Product_metaData(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.MetaData, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Product_addedTime(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -6411,6 +6771,41 @@ func (ec *executionContext) _Product_sub_category(ctx context.Context, field gra
 	res := resTmp.(*model.SubCategory)
 	fc.Result = res
 	return ec.marshalNSubCategory2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐSubCategory(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Product_metaData(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Product",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MetaData, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.MetaData)
+	fc.Result = res
+	return ec.marshalNMetaData2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐMetaDataᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Product_images(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
@@ -7530,6 +7925,48 @@ func (ec *executionContext) _Query_getVendorByUser(ctx context.Context, field gr
 	res := resTmp.([]*model.ShippingVendor)
 	fc.Result = res
 	return ec.marshalOShippingVendor2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShippingVendor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getVendorByID(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getVendorByID_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetVendorByID(rctx, args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ShippingVendor)
+	fc.Result = res
+	return ec.marshalNShippingVendor2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShippingVendor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getShopByProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -14449,6 +14886,37 @@ func (ec *executionContext) unmarshalInputFilterTransaction(ctx context.Context,
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputInsertMetaData(ctx context.Context, obj interface{}) (model.InsertMetaData, error) {
+	var it model.InsertMetaData
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "label":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("label"))
+			it.Label, err = ec.unmarshalNString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			it.Value, err = ec.unmarshalNString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateShop(ctx context.Context, obj interface{}) (model.UpdateShop, error) {
 	var it model.UpdateShop
 	asMap := map[string]interface{}{}
@@ -14905,6 +15373,43 @@ func (ec *executionContext) _ChatDetail(ctx context.Context, sel ast.SelectionSe
 	return out
 }
 
+var metaDataImplementors = []string{"MetaData"}
+
+func (ec *executionContext) _MetaData(ctx context.Context, sel ast.SelectionSet, obj *model.MetaData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, metaDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MetaData")
+		case "id":
+			out.Values[i] = ec._MetaData_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "label":
+			out.Values[i] = ec._MetaData_label(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "value":
+			out.Values[i] = ec._MetaData_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -14975,6 +15480,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "updateProduct":
+			out.Values[i] = ec._Mutation_updateProduct(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteProduct":
+			out.Values[i] = ec._Mutation_deleteProduct(ctx, field)
 		case "createShop":
 			out.Values[i] = ec._Mutation_createShop(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -15094,11 +15606,6 @@ func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "metaData":
-			out.Values[i] = ec._Product_metaData(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "addedTime":
 			out.Values[i] = ec._Product_addedTime(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -15126,6 +15633,11 @@ func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "sub_category":
 			out.Values[i] = ec._Product_sub_category(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "metaData":
+			out.Values[i] = ec._Product_metaData(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -15512,6 +16024,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getVendorByUser(ctx, field)
+				return res
+			})
+		case "getVendorByID":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getVendorByID(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "getShopByProduct":
@@ -17206,6 +17732,11 @@ func (ec *executionContext) marshalNDate2string(ctx context.Context, sel ast.Sel
 	return res
 }
 
+func (ec *executionContext) unmarshalNInsertMetaData2githubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐInsertMetaData(ctx context.Context, v interface{}) (model.InsertMetaData, error) {
+	res, err := ec.unmarshalInputInsertMetaData(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -17255,6 +17786,60 @@ func (ec *executionContext) marshalNInt2ᚕintᚄ(ctx context.Context, sel ast.S
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalNMetaData2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐMetaDataᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.MetaData) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNMetaData2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐMetaData(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNMetaData2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐMetaData(ctx context.Context, sel ast.SelectionSet, v *model.MetaData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._MetaData(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNProduct2githubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐProduct(ctx context.Context, sel ast.SelectionSet, v model.Product) graphql.Marshaler {
@@ -17431,6 +18016,10 @@ func (ec *executionContext) marshalNShippingAddress2ᚖgithubᚗcomᚋkeziaglr�
 		return graphql.Null
 	}
 	return ec._ShippingAddress(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNShippingVendor2githubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShippingVendor(ctx context.Context, sel ast.SelectionSet, v model.ShippingVendor) graphql.Marshaler {
+	return ec._ShippingVendor(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNShippingVendor2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShippingVendorᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ShippingVendor) graphql.Marshaler {

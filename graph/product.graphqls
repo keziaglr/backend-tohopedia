@@ -4,7 +4,6 @@ type Product{
     description: String!
     price: Int!
     discount: Int!
-    metaData: String!
     addedTime: Time!
     stock: Int!
     rating: Int!
@@ -12,6 +11,7 @@ type Product{
     
     sub_category_id: Int!
     sub_category: SubCategory!
+    metaData: [MetaData!]!
     images: [ProductImage!]!
 
     createdAt: Time!
@@ -22,6 +22,12 @@ type Product{
 type ProductImage{
     id: Int!
     url: String!
+}
+
+type MetaData{
+    id: Int!
+    label: String!
+    value: String!
 }
 
 input Filter{
@@ -46,6 +52,13 @@ extend type Query{
     getBestSellingProducts(shopId: Int!): [Product!]!
 }
 
+input InsertMetaData{
+    label: [String]!
+    value: [String]!
+}
+
 extend type Mutation{
-    insertProduct(name: String!, categoryId: Int!, images: [String!]!, description: String!, price: Int!, discount: Int, metaData: String): Product!
+    insertProduct(shopId: Int!, name: String!, categoryId: Int!, images: [String!]!, description: String!, price: Int!, discount: Int, input: InsertMetaData!): Product!
+    updateProduct(productId: Int!, shopId: Int!, name: String!, categoryId: Int!, images: [String!]!, description: String!, price: Int!, discount: Int, input: InsertMetaData!): Product!
+    deleteProduct(productId: Int!): Product
 }

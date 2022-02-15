@@ -37,3 +37,9 @@ func (r *queryResolver) GetVendorByUser(ctx context.Context, userID int) ([]*mod
 	r.DB.Table("shipping_vendors").Select("shipping_vendors.*").Joins("left join shop_shipping_vendors on shipping_vendors.id = shop_shipping_vendors.vendor_id").Where("shop_shipping_vendors.shop_id=?", shop.ID).Scan(&vendors)
 	return vendors, nil
 }
+
+func (r *queryResolver) GetVendorByID(ctx context.Context, id int) (*model.ShippingVendor, error) {
+	var ship *model.ShippingVendor
+	r.DB.Where("id = ?", id).Find(&ship)
+	return ship, nil
+}

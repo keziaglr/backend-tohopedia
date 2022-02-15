@@ -21,7 +21,7 @@ func (r *queryResolver) GetTransactionByUser(ctx context.Context, userID int, in
 	if input.Status != nil {
 		temp.Where("transaction_headers.status = ?", input.Status)
 	}
-	 if input.Date != nil {
+	if input.Date != nil {
 		temp.Where("transaction_headers.transaction_date = ?", input.Date)
 	}
 

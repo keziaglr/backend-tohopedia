@@ -64,8 +64,11 @@ func initDB() {
 }
 
 func migrate(){
-	
 	db.Migrator().DropTable(
+		&model.Product{},
+	)
+	db.Migrator().DropTable(
+		&model.MetaData{},
 		&model.Campaign{},
 		&model.ShippingVendor{},
 		&model.Badges{},  
@@ -73,7 +76,6 @@ func migrate(){
 		&model.Category{},
 		&model.SubCategory{}, 
 		&model.ProductImage{}, 
-		&model.Product{},
 		&model.ShippingAddress{},
 		&model.User{}, 
 		&model.ShopPromo{},
@@ -105,6 +107,7 @@ func migrate(){
 		&model.Voucher{},
 		&model.Category{},
 		&model.SubCategory{}, 
+		&model.MetaData{},
 		&model.ProductImage{}, 
 		&model.Product{},
 		&model.ShippingAddress{},
@@ -128,10 +131,10 @@ func migrate(){
 		&model.Review{},  
 		&model.TransactionHeader{}, 
 		&model.TransactionDetail{},
-	)	
-}
-
-func seeds(){
+		)	
+	}
+	
+	func seeds(){
 	seedMaster();
 }
 
@@ -417,7 +420,11 @@ func seedMaster() {
 					Description: "MacBook Pro Description",
 					Price: 50000000,
 					Discount: 10,
-					MetaData: "Weight: 3gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "3 gram",},{Label: "Color", 
+						Value: "Grey",},
+					},
 					AddedTime: time.Now(),
 					SoldCount: 100,
 					Stock: 10000,
@@ -435,7 +442,11 @@ func seedMaster() {
 					Description: "IPhone 13 Description",
 					Price: 700000,
 					Discount: 2,
-					MetaData: "Weight: 1gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "1 gram",},{Label: "Color", 
+						Value: "Pink",},
+					},
 					AddedTime: time.Now(),
 					Stock: 200000,
 					SoldCount: 250,
@@ -454,7 +465,11 @@ func seedMaster() {
 					Price: 600000,
 					Discount: 3,
 					SoldCount: 250,
-					MetaData: "Weight: 1gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "1 gram",},{Label: "Color", 
+						Value: "Blue Oceam",},
+					},
 					AddedTime: time.Now(),
 					Stock: 200000,
 					Rating: 5,
@@ -472,7 +487,11 @@ func seedMaster() {
 					Price: 650000,
 					Discount: 4,
 					SoldCount: 300,
-					MetaData: "Weight: 1gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "1 gram",},{Label: "Color", 
+						Value: "Lilac",},
+					},
 					AddedTime: time.Now(),
 					Stock: 50000,
 					Rating: 4,
@@ -490,7 +509,11 @@ func seedMaster() {
 					Price: 500000,
 					Discount: 7,
 					SoldCount: 400,
-					MetaData: "Weight: 1gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "1 gram",},{Label: "Color", 
+						Value: "Black",},
+					},
 					AddedTime: time.Now(),
 					Stock: 70000,
 					Rating: 5,
@@ -508,7 +531,11 @@ func seedMaster() {
 					Price: 800000,
 					Discount: 8,
 					SoldCount: 600,
-					MetaData: "Weight: 1gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "1 gram",},{Label: "Color", 
+						Value: "Pink",},
+					},
 					AddedTime: time.Now(),
 					Stock: 80000,
 					Rating: 4,
@@ -526,7 +553,11 @@ func seedMaster() {
 					Price: 700000,
 					Discount: 7,
 					SoldCount: 100,
-					MetaData: "Weight: 0.8gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "0.8 gram",},{Label: "Color", 
+						Value: "Yellow",},
+					},
 					AddedTime: time.Now(),
 					Stock: 70000,
 					Rating: 5,
@@ -544,7 +575,11 @@ func seedMaster() {
 					Price: 600000,
 					Discount: 6,
 					SoldCount: 250,
-					MetaData: "Weight: 0.75gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "1 gram",},{Label: "Color", 
+						Value: "Rose Gold",},
+					},
 					AddedTime: time.Now(),
 					Stock: 60000,
 					Rating: 5,
@@ -562,7 +597,11 @@ func seedMaster() {
 					Price: 8920000,
 					Discount: 3,
 					SoldCount: 200,
-					MetaData: "Weight: 2gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "2 gram",},{Label: "Color", 
+						Value: "White",},
+					},
 					AddedTime: time.Now(),
 					Stock: 60000,
 					Rating: 5,
@@ -610,7 +649,11 @@ func seedMaster() {
 					Price: 9200000,
 					SoldCount: 300,
 					Discount: 10,
-					MetaData: "Weight: 10gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "10 gram",},{Label: "Color", 
+						Value: "Grey",},
+					},
 					AddedTime: time.Now(),
 					Stock: 30000,
 					Rating: 3,
@@ -628,7 +671,11 @@ func seedMaster() {
 					Price: 7630000,
 					Discount: 5,
 					SoldCount: 200,
-					MetaData: "Weight: 20gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "20 gram",},{Label: "Color", 
+						Value: "Grey",},
+					},
 					AddedTime: time.Now(),
 					Stock: 250000,
 					Rating: 4,
@@ -645,7 +692,11 @@ func seedMaster() {
 					Description: "Dining Chair Description",
 					Price: 93000,
 					Discount: 0,
-					MetaData: "Weight: 10gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "10 gram",},{Label: "Color", 
+						Value: "Black",},
+					},
 					AddedTime: time.Now(),
 					Stock: 5000,
 					Rating: 3,
@@ -663,7 +714,11 @@ func seedMaster() {
 					Description: "Cafe Table Description",
 					Price: 330000,
 					Discount: 5,
-					MetaData: "Weight: 20gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "3 gram",},{Label: "Color", 
+						Value: "White",},
+					},
 					AddedTime: time.Now(),
 					Stock: 250000,
 					Rating: 4,
@@ -681,7 +736,11 @@ func seedMaster() {
 					Description: "Kids Chair Description",
 					Price: 770000,
 					Discount: 15,
-					MetaData: "Weight: 5gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "5 gram",},{Label: "Color", 
+						Value: "Blue",},
+					},
 					AddedTime: time.Now(),
 					Stock: 4000,
 					Rating: 5,
@@ -699,7 +758,11 @@ func seedMaster() {
 					Description: "Kids Table Description",
 					Price: 230000,
 					Discount: 13,
-					MetaData: "Weight: 5gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "5 gram",},{Label: "Color", 
+						Value: "Red",},
+					},
 					AddedTime: time.Now(),
 					Stock: 250000,
 					Rating: 5,
@@ -747,7 +810,11 @@ func seedMaster() {
 					Description: "Body Scrub Description",
 					Price: 55000,
 					Discount: 5,
-					MetaData: "Weight: 1gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "1 gram",},{Label: "Variant", 
+						Value: "Coffee",},
+					},
 					AddedTime: time.Now(),
 					Stock: 10000,
 					SoldCount: 250,
@@ -765,7 +832,11 @@ func seedMaster() {
 					Description: "Shower Scrub Description",
 					Price: 660000,
 					Discount: 20,
-					MetaData: "Weight: 1gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "1 gram",},{Label: "Variant", 
+						Value: "Marshmellow",},
+					},
 					AddedTime: time.Now(),
 					Stock: 200000,
 					SoldCount: 300,
@@ -783,7 +854,11 @@ func seedMaster() {
 					Description: "Body Lotion Description",
 					Price: 600000,
 					Discount: 30,
-					MetaData: "Weight: 1gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "1 gram",},{Label: "Color", 
+						Value: "Pink",},
+					},
 					AddedTime: time.Now(),
 					Stock: 200000,
 					SoldCount: 700,
@@ -801,7 +876,11 @@ func seedMaster() {
 					Description: "Hair Serum Description",
 					Price: 6600,
 					Discount: 40,
-					MetaData: "Weight: 1gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "0.5 gram",},{Label: "Color", 
+						Value: "Gold",},
+					},
 					AddedTime: time.Now(),
 					Stock: 50000,
 					Rating: 4,
@@ -819,7 +898,11 @@ func seedMaster() {
 					Description: "Kuteks Description",
 					Price: 440000,
 					Discount: 70,
-					MetaData: "Weight: 1gram",
+					MetaData: []*model.MetaData{
+						{Label: "Weight", 
+						Value: "0.3 gram",},{Label: "Color", 
+						Value: "Colorful",},
+					},
 					AddedTime: time.Now(),
 					Stock: 70000,
 					Rating: 5,
@@ -989,5 +1072,6 @@ func seedMaster() {
 	db.Create(&shopVoucher)
 	db.Create(&header)
 	db.Create(&detail)
+	// db.Create(&)
 }
 

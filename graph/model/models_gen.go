@@ -38,6 +38,17 @@ type FilterTransaction struct {
 	Date    *string `json:"date"`
 }
 
+type InsertMetaData struct {
+	Label []*string `json:"label"`
+	Value []*string `json:"value"`
+}
+
+type MetaData struct {
+	ID    int    `json:"id"`
+	Label string `json:"label"`
+	Value string `json:"value"`
+}
+
 type ShippingAddress struct {
 	ID      int    `json:"id"`
 	Address string `json:"address"`

@@ -9,4 +9,5 @@ extend type Query{
     vendors: [ShippingVendor!]!
     getVendorByProduct(productId: Int!): [ShippingVendor]
     getVendorByUser(userId: Int!): [ShippingVendor]
+    getVendorByID(id: Int!): ShippingVendor!
 }

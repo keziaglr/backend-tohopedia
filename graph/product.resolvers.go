@@ -11,18 +11,71 @@ import (
 	"github.com/keziaglr/backend-tohopedia/graph/model"
 )
 
-func (r *mutationResolver) InsertProduct(ctx context.Context, name string, categoryID int, images []string, description string, price int, discount *int, metaData *string) (*model.Product, error) {
+func (r *mutationResolver) InsertProduct(ctx context.Context, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) (*model.Product, error) {
+	var productImages []*model.ProductImage
+	for i := 0; i < len(images); i++ {
+		productImages = append(productImages, &model.ProductImage{URL: images[i]})
+	}
+
+	var metadatas []*model.MetaData
+	for i := 0; i < len(input.Label); i++ {
+		metadatas = append(metadatas, &model.MetaData{
+			Label: *input.Label[i],
+			Value: *input.Value[i],
+		})
+	}
+
 	product := model.Product{
 		Name:          name,
 		SubCategoryID: categoryID,
-		Images:        []*model.ProductImage{{URL: images[1]}, {URL: images[2]}},
+		Images:        productImages,
 		Description:   description,
 		Price:         price,
 		Discount:      *discount,
-		MetaData:      *metaData,
+		MetaData:      metadatas,
 	}
 
 	r.DB.Create(&product)
+	r.DB.Exec("INSERT INTO shop_product VALUES (?,?)", shopID, product.ID)
+	return &product, nil
+}
+
+func (r *mutationResolver) UpdateProduct(ctx context.Context, productID int, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) (*model.Product, error) {
+	var product *model.Product
+	r.DB.Exec("DELETE product_images FROM product_images JOIN product_image WHERE product_images.id = product_image.product_image_id AND product_image.product_id = ?", productID)
+	r.DB.Exec("DELETE product_metadata FROM product_metadata JOIN meta_data WHERE meta_data.id = product_metadata.meta_data_id AND product_metadata.product_id = ?", productID)
+	r.DB.Where("id = ?", productID).First(&product)
+	var productImages []*model.ProductImage
+	for i := 0; i < len(images); i++ {
+		productImages = append(productImages, &model.ProductImage{URL: images[i]})
+	}
+
+	var metadatas []*model.MetaData
+	for i := 0; i < len(input.Label); i++ {
+		metadatas = append(metadatas, &model.MetaData{
+			Label: *input.Label[i],
+			Value: *input.Value[i],
+		})
+	}
+
+	if product != nil {
+		product.Name = name
+		product.SubCategoryID = categoryID
+		product.Description = description
+		product.Price = price
+		product.Discount = *discount
+		product.Images = productImages
+		product.MetaData = product.MetaData
+		r.DB.Save(&product)
+		return product, nil
+	}
+
+	return nil, nil
+}
+
+func (r *mutationResolver) DeleteProduct(ctx context.Context, productID int) (*model.Product, error) {
+	var product model.Product
+	r.DB.Where("id = ?", productID).Delete(&product)
 	return &product, nil
 }
 
