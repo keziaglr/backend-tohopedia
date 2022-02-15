@@ -6,13 +6,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-chi/chi"
-	"github.com/rs/cors"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi"
 	"github.com/keziaglr/backend-tohopedia/graph"
 	"github.com/keziaglr/backend-tohopedia/graph/generated"
 	"github.com/keziaglr/backend-tohopedia/graph/model"
+	"github.com/rs/cors"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -919,6 +919,63 @@ func seedMaster() {
 			URL: "https://ecs7.tokopedia.net/img/blog/seller/2020/09/statistik-new-768x400.jpg",
 		}, 
 	}
+	var s = time.Now().String()
+	header := []model.TransactionHeader{
+		{
+			UserID: 1,
+			TransactionType: "Belanja",
+			TransactionDate: s[0:10],
+			VoucherID: 1,
+			Status: "Berlangsung",
+			InvoiceNumber: graph.StringRandom(10),
+			NoResi: graph.StringRandom(10),
+			PaymentMethod: "OVO",
+			Total: 1500000,
+			ShippingAddress: "Kalimantan Barat",
+			PaymentDiscount: 100000,
+			ShippingID: 1,
+		},
+		{
+			UserID: 1,
+			TransactionType: "Belanja",
+			TransactionDate: s[0:10],
+			VoucherID: 2,
+			Status: "Tidak Berhasil",
+			Total: 2000000,
+			InvoiceNumber: graph.StringRandom(10),
+			NoResi: graph.StringRandom(10),
+			PaymentMethod: "GoPay",
+			ShippingAddress: "Kalimantan Barat",
+			PaymentDiscount: 150000,
+			ShippingID: 2,
+		},
+	}
+
+	detail := []model.TransactionDetail{
+		{
+			TransactionID: 1,
+			ProductID: 1,
+			Qty: 3,
+		}, {
+			TransactionID: 1,
+			ProductID: 10,
+			Qty: 5,
+		}, {
+			TransactionID: 2,
+			ProductID: 3,
+			Qty: 5,
+		}, {
+			TransactionID: 2,
+			ProductID: 15,
+			Qty: 10,
+		}, {
+			TransactionID: 2,
+			ProductID: 9,
+			Qty: 15,
+		},
+	}
+
+
 	db.Create(&campaign)
 	db.Create(&badge)
 	db.Create(&shipping)
@@ -930,5 +987,7 @@ func seedMaster() {
 	db.Create(&shop)
 	db.Create(&shopVendor)
 	db.Create(&shopVoucher)
+	db.Create(&header)
+	db.Create(&detail)
 }
 

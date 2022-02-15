@@ -20,11 +20,13 @@ type TransactionHeader struct {
 	ID              int             `json:"id" gorm:"primaryKey"`
 	UserID          int             `json:"user_id"`
 	TransactionType string          `json:"transactionType"`
-	TransactionDate time.Time          `json:"transactionDate"`
+	TransactionDate string         `json:"transactionDate"`
 	Voucher       *Voucher           `json:"voucher" gorm:"foreignKey:VoucherID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	VoucherID     int                `json:"voucher_id"`
+	Total     int                `json:"total"`
 	Status          string          `json:"status"`
 	InvoiceNumber   string          `json:"invoiceNumber"`
+	NoResi   string          `json:"noResi"`
 	PaymentMethod   string          `json:"paymentMethod"`
 	ShippingAddress string          `json:"shippingAddress"`
 	PaymentDiscount int             `json:"paymentDiscount"`

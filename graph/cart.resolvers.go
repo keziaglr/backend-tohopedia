@@ -54,18 +54,20 @@ func (r *mutationResolver) DeleteCart(ctx context.Context, userID int, productID
 	return nil, nil
 }
 
-func (r *mutationResolver) Checkout(ctx context.Context, userID int, transactionType string, paymentMethod string, shippingAddress string, paymentDiscount int, voucherID *int, shippingID int, input model.CartProduct) (*model.TransactionHeader, error) {
+func (r *mutationResolver) Checkout(ctx context.Context, userID int, transactionType string, paymentMethod string, shippingAddress string, paymentDiscount int, voucherID *int, shippingID int, total int, input model.CartProduct) (*model.TransactionHeader, error) {
+	var s = time.Now().String()
 	transaction := model.TransactionHeader{
 		UserID:          userID,
 		TransactionType: transactionType,
-		TransactionDate: time.Now(),
+		TransactionDate: s[0:10],
 		Status:          "Berlangsung",
 		InvoiceNumber:   StringRandom(10),
 		PaymentMethod:   paymentMethod,
 		ShippingAddress: shippingAddress,
 		PaymentDiscount: paymentDiscount,
 		VoucherID:       *voucherID,
-		ShippingID: shippingID,
+		ShippingID:      shippingID,
+		Total:           total,
 	}
 	r.DB.Create(&transaction)
 

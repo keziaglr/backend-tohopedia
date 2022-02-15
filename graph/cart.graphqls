@@ -21,7 +21,7 @@ input CartProduct{
 extend type Mutation{
     createCart(userId: Int!, productId: Int!, qty: Int!, note: String!) : Cart!
     deleteCart(userId: Int!, productId: Int!) : Cart!
-    checkout(userId: Int!, transactionType:String!, paymentMethod:String!, shippingAddress:String!, paymentDiscount: Int!, voucherId: Int, shippingId: Int!, input: CartProduct!) : TransactionHeader!
+    checkout(userId: Int!, transactionType:String!, paymentMethod:String!, shippingAddress:String!, paymentDiscount: Int!, voucherId: Int, shippingId: Int!, total: Int!, input: CartProduct!) : TransactionHeader!
     
 }
 

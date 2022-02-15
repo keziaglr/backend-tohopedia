@@ -2,12 +2,14 @@ type TransactionHeader{
     id: Int!
     user_id: Int!
     transactionType: String!
-    transactionDate: Time!
+    transactionDate: String!
     status: String!
     invoiceNumber: String!
     paymentMethod: String!
     shippingAddress: String!
     paymentDiscount: Int!
+    noResi: String!
+    total: Int!
 
     shipping_id: Int!
     shippingVendor: ShippingVendor!
@@ -32,4 +34,16 @@ type TransactionDetail{
     createdAt: Time!
     updatedAt: Time!
     deletedAt: Time!
+}
+
+input FilterTransaction{
+    keyword: String
+    status: String
+    date: String
+}
+
+extend type Query{
+    getTransactionByUser(userId: Int!, input: FilterTransaction): [TransactionHeader!]
+    getTransactionDetail(userId: Int!, transactionId: Int!): [TransactionDetail!]
+    getTransactionByID(userId: Int!, id: Int!): TransactionHeader!
 }

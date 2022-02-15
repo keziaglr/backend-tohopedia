@@ -32,6 +32,12 @@ type Filter struct {
 	ProductAdded *int      `json:"productAdded"`
 }
 
+type FilterTransaction struct {
+	Keyword *string `json:"keyword"`
+	Status  *string `json:"status"`
+	Date    *string `json:"date"`
+}
+
 type ShippingAddress struct {
 	ID      int    `json:"id"`
 	Address string `json:"address"`
