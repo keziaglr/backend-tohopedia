@@ -65,7 +65,7 @@ func (r *mutationResolver) UpdateProduct(ctx context.Context, productID int, sho
 		product.Price = price
 		product.Discount = *discount
 		product.Images = productImages
-		product.MetaData = product.MetaData
+		product.MetaData = metadatas
 		r.DB.Save(&product)
 		return product, nil
 	}
@@ -87,7 +87,7 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 
 func (r *queryResolver) GetProductByID(ctx context.Context, id int) (*model.Product, error) {
 	var product *model.Product
-	r.DB.Preload("Images").Where("id=?", id).First(&product)
+	r.DB.Preload("Images").Preload("MetaData").Preload("Review").Where("products.id=?", id).First(&product)
 	return product, nil
 }
 

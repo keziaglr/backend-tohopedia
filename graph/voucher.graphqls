@@ -5,8 +5,8 @@ type Voucher{
     discountRate: Int!
     code: String!
     tnc: String!
-    startTime: Time!
-    endTime: Time!
+    startTime: String!
+    endTime: String!
 }
 
 extend type Query{
@@ -16,6 +16,17 @@ extend type Query{
     getVoucherCart(userId: Int!): [Voucher!]!
 }
 
+input CreateVoucher{
+    name: String!
+    description: String!
+    discountRate: Int!
+    tnc: String!
+    startTime: String!
+    endTime: String!
+}
+
 extend type Mutation{
     createUserVoucher(voucherId: Int!, userId: Int!): UserVoucher!
+    createShopVoucher(shopId: Int!, input: CreateVoucher!): Voucher!
+    createGlobalVoucher(input: CreateVoucher!): Voucher!
 }

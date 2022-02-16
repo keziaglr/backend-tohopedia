@@ -13,6 +13,7 @@ type Product{
     sub_category: SubCategory!
     metaData: [MetaData!]!
     images: [ProductImage!]!
+    review: [Review]
 
     createdAt: Time!
     updatedAt: Time!

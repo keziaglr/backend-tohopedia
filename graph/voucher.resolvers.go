@@ -19,6 +19,67 @@ func (r *mutationResolver) CreateUserVoucher(ctx context.Context, voucherID int,
 	return &userVoucher, nil
 }
 
+func (r *mutationResolver) CreateShopVoucher(ctx context.Context, shopID int, input model.CreateVoucher) (*model.Voucher, error) {
+	voucher := model.Voucher{
+		Name:         input.Name,
+		Description:  input.Description,
+		DiscountRate: input.DiscountRate,
+		Code:         StringRandom(5),
+		Tnc:          input.Tnc,
+		StartTime:    input.StartTime,
+		EndTime:      input.EndTime,
+	}
+
+	r.DB.Create(&voucher)
+
+	shopVoucher := model.ShopVoucher{
+		VoucherID: voucher.ID,
+		ShopID:    shopID,
+	}
+
+	r.DB.Create(&shopVoucher)
+
+	return &voucher, nil
+}
+
+func (r *mutationResolver) CreateGlobalVoucher(ctx context.Context, input model.CreateVoucher) (*model.Voucher, error) {
+	voucher := model.Voucher{
+		Name:         input.Name,
+		Description:  input.Description,
+		DiscountRate: input.DiscountRate,
+		Code:         StringRandom(5),
+		Tnc:          input.Tnc,
+		StartTime:    input.StartTime,
+		EndTime:      input.EndTime,
+	}
+
+	r.DB.Create(&voucher)
+
+	// var users []*model.User
+	// r.DB.Where("role = ?", "user").Find(&users)
+
+	// for i := 0; i < len(users); i++ {
+	// 	userVoucher := model.UserVoucher{
+	// 		VoucherID: voucher.ID,
+	// 		UserID:    users[i].ID,
+	// 	}
+	// 	r.DB.Create(&userVoucher)
+	// }
+
+	var shops []*model.Shop
+	r.DB.Find(&shops)
+
+	for i := 0; i < len(shops); i++ {
+		shopVoucher := model.ShopVoucher{
+			VoucherID: voucher.ID,
+			ShopID:    shops[i].ID,
+		}
+		r.DB.Create(&shopVoucher)
+	}
+
+	return &voucher, nil
+}
+
 func (r *queryResolver) GetVoucherByProduct(ctx context.Context, productID int) ([]*model.Voucher, error) {
 	var vouchers []*model.Voucher
 

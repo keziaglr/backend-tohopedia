@@ -9,3 +9,13 @@ type Request {
     updatedAt: Time!
     deletedAt: Time!
 }
+
+extend type Mutation{
+    updateStatusUser(userId: Int!, status: Boolean!): User!
+    sendRequest(userId: Int!, status:String!): Request!
+    responseRequest(userId: Int!, status:Boolean!, requestId: Int!): Request!
+}
+
+extend type Query{
+    requests:[Request]
+}

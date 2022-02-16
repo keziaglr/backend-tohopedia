@@ -8,14 +8,12 @@ import (
 type Review struct {
 	ID          int       `json:"id"`
 	UserID      int       `json:"user_id"`
-	ProductID   int       `json:"product_id"`
 	Score       int       `json:"score"`
 	Description string    `json:"description"`
-	Image       *string   `json:"image"`
-	Type 		*string	`json:"type"`
+	Image       string   `json:"image"`
+	Type 		string	`json:"type"`
 	Status      string    `json:"status"`
 	User        *User     `json:"user" gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Product     *Product  `json:"product" gorm:"foreignKey:ProductID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
 	DeletedAt   time.Time `json:"deletedAt"`

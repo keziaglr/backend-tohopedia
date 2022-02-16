@@ -1,15 +1,13 @@
 type Review{
     id: Int!
     user_id: Int!
-    product_id: Int!
     score: Int!
     description: String!
-    image: String
+    image: String!
     status: String!
     type: String!
 
     user: User!
-    product: Product!
 
     createdAt: Time!
     updatedAt: Time!
@@ -29,4 +27,14 @@ type ReviewReply{
     createdAt: Time!
     updatedAt: Time!
     deletedAt: Time!  
+}
+
+extend type Mutation{
+    createReview(userId: Int!, transactionId: Int!, score: Int!, description: String!, image: String!, typeReview: String!): Review!
+    createReviewReply(reviewId: Int!, sourceId: Int!, role: String!, messsage: String!): ReviewReply!
+} 
+
+extend type Query{
+    getReviewsByType(productId: Int!, typeReview: String!, filter:String!): [Review]
+    getReviewDetail(reviewId: Int!): [ReviewReply]
 }

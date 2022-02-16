@@ -23,6 +23,7 @@ type Product struct {
 	SubCategory   *SubCategory    `json:"sub_category" gorm:"foreignKey:SubCategoryID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Images        []*ProductImage `json:"images" gorm:"many2many:product_image;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	MetaData      []*MetaData `json:"metaData" gorm:"many2many:product_metadata;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Review      []*Review `json:"review" gorm:"many2many:product_review;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	CreatedAt     time.Time       `json:"createdAt"`
 	UpdatedAt     time.Time       `json:"updatedAt"`
 	DeletedAt     time.Time       `json:"deletedAt"`

@@ -21,6 +21,15 @@ type CreateShop struct {
 	Address     string `json:"address"`
 }
 
+type CreateVoucher struct {
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	DiscountRate int    `json:"discountRate"`
+	Tnc          string `json:"tnc"`
+	StartTime    string `json:"startTime"`
+	EndTime      string `json:"endTime"`
+}
+
 type Filter struct {
 	Type         []*int    `json:"type"`
 	Location     []*string `json:"location"`
