@@ -438,11 +438,11 @@ func seedMaster() {
 					},
 					Review: []*model.Review{
 						{
-							UserID:      1,
+							UserID:      3,
 							Score:       4,
 							Description: "Keren Banget!",
 							Image:       "https://images.macrumors.com/t/mig4panIIBIcVZ8SkKrqaJCuKs4=/x/smart/article-new/2021/10/macbook-pro-2021-verge.jpg",
-							Type:        "Public",
+							Type:        "",
 							CreatedAt:   time.Now(),
 						}, {
 							UserID:      3,
@@ -456,7 +456,7 @@ func seedMaster() {
 							Score:       5,
 							Description: "The Best",
 							Image:       "null",
-							Type:        "Public",
+							Type:        "",
 							CreatedAt:   time.Now(),
 						},
 					},
@@ -1086,19 +1086,53 @@ func seedMaster() {
 			ReviewID: 1,
 			Role: "Shop",
 			SourceID: 1,
-			Messsage: "Terima kasih, Kak",
+			Messsage: "Thankyou dear ^^",
 		},{
 			ReviewID: 1,
 			Role: "User",
 			SourceID: 3,
-			Messsage: "Baik, Kak",
+			Messsage: "Urwell :)",
 		},{
 			ReviewID: 2,
 			Role: "Shop",
 			SourceID: 1,
-			Messsage: "Terima kasih atas sarannya, Kak",
+			Messsage: "Baik kak",
 		},
 	}
+
+	discussion := []model.Discussion{
+		{
+			UserID: 4,
+			ProductID: 1,
+			Content: "Ada warna apa aja ya?",
+		}, {
+			UserID: 3,
+			ProductID: 1,
+			Content: "Ready kak?",
+		},
+	}
+
+	discussionReply := []model.DiscussionReply{
+		{
+			DiscussionID: 1,
+			SourceID: 1,
+			Role: "Shop",
+			Messsage: "Grey dan Black ya kak ^^",
+		},
+		{
+			DiscussionID: 1,
+			SourceID: 4,
+			Role: "User",
+			Messsage: "Terima kasih kak",
+		},
+		{
+			DiscussionID: 2,
+			SourceID: 1,
+			Role: "Shop",
+			Messsage: "Ready ya kak ^^",
+		},
+	}
+		
 
 	db.Create(&campaign)
 	db.Create(&badge)
@@ -1114,4 +1148,6 @@ func seedMaster() {
 	db.Create(&header)
 	db.Create(&detail)
 	db.Create(&review)
+	db.Create(&discussion)
+	db.Create(&discussionReply)
 }

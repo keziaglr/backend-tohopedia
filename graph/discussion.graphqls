@@ -3,7 +3,6 @@ type Discussion{
     user_id: Int!
     product_id: Int!
     content: String!
-    description: String!
 
     user: User!
     product: Product!
@@ -26,4 +25,14 @@ type DiscussionReply{
     createdAt: Time!
     updatedAt: Time!
     deletedAt: Time!  
+}
+
+extend type Mutation{
+    createDiscussion(userId: Int!, productId: Int!, content: String!): Discussion!
+    createDiscussionReply(discussionId:Int!, sourceId:Int!, role:String!, messsage:String!): DiscussionReply!
+} 
+
+extend type Query{
+    getDiscussion(productId: Int!): [Discussion]
+    getDiscussionDetail(discussionId: Int!): [DiscussionReply]
 }

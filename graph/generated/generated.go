@@ -98,6 +98,30 @@ type ComplexityRoot struct {
 		UpdatedAt func(childComplexity int) int
 	}
 
+	Discussion struct {
+		Content   func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		DeletedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Product   func(childComplexity int) int
+		ProductID func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+		User      func(childComplexity int) int
+		UserID    func(childComplexity int) int
+	}
+
+	DiscussionReply struct {
+		CreatedAt    func(childComplexity int) int
+		DeletedAt    func(childComplexity int) int
+		Discussion   func(childComplexity int) int
+		DiscussionID func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Messsage     func(childComplexity int) int
+		Role         func(childComplexity int) int
+		SourceID     func(childComplexity int) int
+		UpdatedAt    func(childComplexity int) int
+	}
+
 	MetaData struct {
 		ID    func(childComplexity int) int
 		Label func(childComplexity int) int
@@ -105,29 +129,31 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AuthUser            func(childComplexity int, input model.AuthUser) int
-		Checkout            func(childComplexity int, userID int, transactionType string, paymentMethod string, shippingAddress string, paymentDiscount int, voucherID *int, shippingID int, total int, input model.CartProduct) int
-		CreateCart          func(childComplexity int, userID int, productID int, qty int, note string) int
-		CreateGlobalVoucher func(childComplexity int, input model.CreateVoucher) int
-		CreateOtp           func(childComplexity int, email string) int
-		CreateReview        func(childComplexity int, userID int, transactionID int, score int, description string, image string, typeReview string) int
-		CreateReviewReply   func(childComplexity int, reviewID int, sourceID int, role string, messsage string) int
-		CreateShop          func(childComplexity int, input model.CreateShop) int
-		CreateShopVoucher   func(childComplexity int, shopID int, input model.CreateVoucher) int
-		CreateUser          func(childComplexity int, input model.AuthUser) int
-		CreateUserVoucher   func(childComplexity int, voucherID int, userID int) int
-		CreateWishlist      func(childComplexity int, productID int, userID int) int
-		DeleteCart          func(childComplexity int, userID int, productID int) int
-		DeleteProduct       func(childComplexity int, productID int) int
-		DeleteWishlist      func(childComplexity int, productID []int, userID int) int
-		InsertProduct       func(childComplexity int, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) int
-		ResetPassword       func(childComplexity int, input model.AuthUser) int
-		ResponseRequest     func(childComplexity int, userID int, status bool, requestID int) int
-		SendRequest         func(childComplexity int, userID int, status string) int
-		UpdateProduct       func(childComplexity int, productID int, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) int
-		UpdateShop          func(childComplexity int, id int, input model.UpdateShop) int
-		UpdateStatusUser    func(childComplexity int, userID int, status bool) int
-		UpdateUser          func(childComplexity int, id int, input model.UpdateUser) int
+		AuthUser              func(childComplexity int, input model.AuthUser) int
+		Checkout              func(childComplexity int, userID int, transactionType string, paymentMethod string, shippingAddress string, paymentDiscount int, voucherID *int, shippingID int, total int, input model.CartProduct) int
+		CreateCart            func(childComplexity int, userID int, productID int, qty int, note string) int
+		CreateDiscussion      func(childComplexity int, userID int, productID int, content string) int
+		CreateDiscussionReply func(childComplexity int, discussionID int, sourceID int, role string, messsage string) int
+		CreateGlobalVoucher   func(childComplexity int, input model.CreateVoucher) int
+		CreateOtp             func(childComplexity int, email string) int
+		CreateReview          func(childComplexity int, userID int, transactionID int, score int, description string, image string, typeReview string) int
+		CreateReviewReply     func(childComplexity int, reviewID int, sourceID int, role string, messsage string) int
+		CreateShop            func(childComplexity int, input model.CreateShop) int
+		CreateShopVoucher     func(childComplexity int, shopID int, input model.CreateVoucher) int
+		CreateUser            func(childComplexity int, input model.AuthUser) int
+		CreateUserVoucher     func(childComplexity int, voucherID int, userID int) int
+		CreateWishlist        func(childComplexity int, productID int, userID int) int
+		DeleteCart            func(childComplexity int, userID int, productID int) int
+		DeleteProduct         func(childComplexity int, productID int) int
+		DeleteWishlist        func(childComplexity int, productID []int, userID int) int
+		InsertProduct         func(childComplexity int, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) int
+		ResetPassword         func(childComplexity int, input model.AuthUser) int
+		ResponseRequest       func(childComplexity int, userID int, status bool, requestID int) int
+		SendRequest           func(childComplexity int, userID int, status string) int
+		UpdateProduct         func(childComplexity int, productID int, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) int
+		UpdateShop            func(childComplexity int, id int, input model.UpdateShop) int
+		UpdateStatusUser      func(childComplexity int, userID int, status bool) int
+		UpdateUser            func(childComplexity int, id int, input model.UpdateUser) int
 	}
 
 	Otp struct {
@@ -172,6 +198,8 @@ type ComplexityRoot struct {
 		Categories              func(childComplexity int) int
 		GetBadge                func(childComplexity int, shopID int) int
 		GetBestSellingProducts  func(childComplexity int, shopID int) int
+		GetDiscussion           func(childComplexity int, productID int) int
+		GetDiscussionDetail     func(childComplexity int, discussionID int) int
 		GetProductByID          func(childComplexity int, id int) int
 		GetProductsByCategories func(childComplexity int, categoryID int) int
 		GetProductsByShop       func(childComplexity int, shopID int) int
@@ -410,6 +438,8 @@ type MutationResolver interface {
 	CreateCart(ctx context.Context, userID int, productID int, qty int, note string) (*model.Cart, error)
 	DeleteCart(ctx context.Context, userID int, productID int) (*model.Cart, error)
 	Checkout(ctx context.Context, userID int, transactionType string, paymentMethod string, shippingAddress string, paymentDiscount int, voucherID *int, shippingID int, total int, input model.CartProduct) (*model.TransactionHeader, error)
+	CreateDiscussion(ctx context.Context, userID int, productID int, content string) (*model.Discussion, error)
+	CreateDiscussionReply(ctx context.Context, discussionID int, sourceID int, role string, messsage string) (*model.DiscussionReply, error)
 	CreateOtp(ctx context.Context, email string) (string, error)
 	InsertProduct(ctx context.Context, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) (*model.Product, error)
 	UpdateProduct(ctx context.Context, productID int, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) (*model.Product, error)
@@ -438,6 +468,8 @@ type QueryResolver interface {
 	Carts2(ctx context.Context, userID int) ([]*model.Cart, error)
 	Categories(ctx context.Context) ([]*model.Category, error)
 	GetSubCategories(ctx context.Context, categoryID int) ([]*model.SubCategory, error)
+	GetDiscussion(ctx context.Context, productID int) ([]*model.Discussion, error)
+	GetDiscussionDetail(ctx context.Context, discussionID int) ([]*model.DiscussionReply, error)
 	Products(ctx context.Context) ([]*model.Product, error)
 	GetProductByID(ctx context.Context, id int) (*model.Product, error)
 	GetProductsByShop(ctx context.Context, shopID int) ([]*model.Product, error)
@@ -734,6 +766,132 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ChatDetail.UpdatedAt(childComplexity), true
 
+	case "Discussion.content":
+		if e.complexity.Discussion.Content == nil {
+			break
+		}
+
+		return e.complexity.Discussion.Content(childComplexity), true
+
+	case "Discussion.createdAt":
+		if e.complexity.Discussion.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Discussion.CreatedAt(childComplexity), true
+
+	case "Discussion.deletedAt":
+		if e.complexity.Discussion.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.Discussion.DeletedAt(childComplexity), true
+
+	case "Discussion.id":
+		if e.complexity.Discussion.ID == nil {
+			break
+		}
+
+		return e.complexity.Discussion.ID(childComplexity), true
+
+	case "Discussion.product":
+		if e.complexity.Discussion.Product == nil {
+			break
+		}
+
+		return e.complexity.Discussion.Product(childComplexity), true
+
+	case "Discussion.product_id":
+		if e.complexity.Discussion.ProductID == nil {
+			break
+		}
+
+		return e.complexity.Discussion.ProductID(childComplexity), true
+
+	case "Discussion.updatedAt":
+		if e.complexity.Discussion.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Discussion.UpdatedAt(childComplexity), true
+
+	case "Discussion.user":
+		if e.complexity.Discussion.User == nil {
+			break
+		}
+
+		return e.complexity.Discussion.User(childComplexity), true
+
+	case "Discussion.user_id":
+		if e.complexity.Discussion.UserID == nil {
+			break
+		}
+
+		return e.complexity.Discussion.UserID(childComplexity), true
+
+	case "DiscussionReply.createdAt":
+		if e.complexity.DiscussionReply.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.DiscussionReply.CreatedAt(childComplexity), true
+
+	case "DiscussionReply.deletedAt":
+		if e.complexity.DiscussionReply.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.DiscussionReply.DeletedAt(childComplexity), true
+
+	case "DiscussionReply.discussion":
+		if e.complexity.DiscussionReply.Discussion == nil {
+			break
+		}
+
+		return e.complexity.DiscussionReply.Discussion(childComplexity), true
+
+	case "DiscussionReply.discussion_id":
+		if e.complexity.DiscussionReply.DiscussionID == nil {
+			break
+		}
+
+		return e.complexity.DiscussionReply.DiscussionID(childComplexity), true
+
+	case "DiscussionReply.id":
+		if e.complexity.DiscussionReply.ID == nil {
+			break
+		}
+
+		return e.complexity.DiscussionReply.ID(childComplexity), true
+
+	case "DiscussionReply.messsage":
+		if e.complexity.DiscussionReply.Messsage == nil {
+			break
+		}
+
+		return e.complexity.DiscussionReply.Messsage(childComplexity), true
+
+	case "DiscussionReply.role":
+		if e.complexity.DiscussionReply.Role == nil {
+			break
+		}
+
+		return e.complexity.DiscussionReply.Role(childComplexity), true
+
+	case "DiscussionReply.source_id":
+		if e.complexity.DiscussionReply.SourceID == nil {
+			break
+		}
+
+		return e.complexity.DiscussionReply.SourceID(childComplexity), true
+
+	case "DiscussionReply.updatedAt":
+		if e.complexity.DiscussionReply.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.DiscussionReply.UpdatedAt(childComplexity), true
+
 	case "MetaData.id":
 		if e.complexity.MetaData.ID == nil {
 			break
@@ -790,6 +948,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateCart(childComplexity, args["userId"].(int), args["productId"].(int), args["qty"].(int), args["note"].(string)), true
+
+	case "Mutation.createDiscussion":
+		if e.complexity.Mutation.CreateDiscussion == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createDiscussion_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateDiscussion(childComplexity, args["userId"].(int), args["productId"].(int), args["content"].(string)), true
+
+	case "Mutation.createDiscussionReply":
+		if e.complexity.Mutation.CreateDiscussionReply == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createDiscussionReply_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateDiscussionReply(childComplexity, args["discussionId"].(int), args["sourceId"].(int), args["role"].(string), args["messsage"].(string)), true
 
 	case "Mutation.createGlobalVoucher":
 		if e.complexity.Mutation.CreateGlobalVoucher == nil {
@@ -1274,6 +1456,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetBestSellingProducts(childComplexity, args["shopId"].(int)), true
+
+	case "Query.getDiscussion":
+		if e.complexity.Query.GetDiscussion == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getDiscussion_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetDiscussion(childComplexity, args["productId"].(int)), true
+
+	case "Query.getDiscussionDetail":
+		if e.complexity.Query.GetDiscussionDetail == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getDiscussionDetail_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetDiscussionDetail(childComplexity, args["discussionId"].(int)), true
 
 	case "Query.getProductById":
 		if e.complexity.Query.GetProductByID == nil {
@@ -2788,6 +2994,44 @@ type ChatDetail{
     updatedAt: Time!
     deletedAt: Time!
 }`, BuiltIn: false},
+	{Name: "graph/discussion.graphqls", Input: `type Discussion{
+    id: Int!
+    user_id: Int!
+    product_id: Int!
+    content: String!
+
+    user: User!
+    product: Product!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!    
+}
+
+type DiscussionReply{
+    id: Int!
+    discussion_id: Int!
+    source_id: Int!
+
+    role: String!
+    messsage: String!
+
+    discussion: Discussion!
+
+    createdAt: Time!
+    updatedAt: Time!
+    deletedAt: Time!  
+}
+
+extend type Mutation{
+    createDiscussion(userId: Int!, productId: Int!, content: String!): Discussion!
+    createDiscussionReply(discussionId:Int!, sourceId:Int!, role:String!, messsage:String!): DiscussionReply!
+} 
+
+extend type Query{
+    getDiscussion(productId: Int!): [Discussion]
+    getDiscussionDetail(discussionId: Int!): [DiscussionReply]
+}`, BuiltIn: false},
 	{Name: "graph/otp.graphqls", Input: `type Otp {
     id: Int!
     code: String!
@@ -3343,6 +3587,81 @@ func (ec *executionContext) field_Mutation_createCart_args(ctx context.Context, 
 		}
 	}
 	args["note"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createDiscussionReply_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["discussionId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discussionId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["discussionId"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["sourceId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceId"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sourceId"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["role"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["role"] = arg2
+	var arg3 string
+	if tmp, ok := rawArgs["messsage"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("messsage"))
+		arg3, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["messsage"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createDiscussion_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userId"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["productId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productId"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["productId"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["content"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("content"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["content"] = arg2
 	return args, nil
 }
 
@@ -4024,6 +4343,36 @@ func (ec *executionContext) field_Query_getBestSellingProducts_args(ctx context.
 		}
 	}
 	args["shopId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getDiscussionDetail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["discussionId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discussionId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["discussionId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getDiscussion_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["productId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["productId"] = arg0
 	return args, nil
 }
 
@@ -5796,6 +6145,636 @@ func (ec *executionContext) _ChatDetail_deletedAt(ctx context.Context, field gra
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Discussion_id(ctx context.Context, field graphql.CollectedField, obj *model.Discussion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Discussion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Discussion_user_id(ctx context.Context, field graphql.CollectedField, obj *model.Discussion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Discussion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Discussion_product_id(ctx context.Context, field graphql.CollectedField, obj *model.Discussion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Discussion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProductID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Discussion_content(ctx context.Context, field graphql.CollectedField, obj *model.Discussion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Discussion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Content, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Discussion_user(ctx context.Context, field graphql.CollectedField, obj *model.Discussion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Discussion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.User, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Discussion_product(ctx context.Context, field graphql.CollectedField, obj *model.Discussion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Discussion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Product, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Product)
+	fc.Result = res
+	return ec.marshalNProduct2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐProduct(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Discussion_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Discussion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Discussion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Discussion_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Discussion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Discussion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Discussion_deletedAt(ctx context.Context, field graphql.CollectedField, obj *model.Discussion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Discussion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DiscussionReply_id(ctx context.Context, field graphql.CollectedField, obj *model.DiscussionReply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DiscussionReply",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DiscussionReply_discussion_id(ctx context.Context, field graphql.CollectedField, obj *model.DiscussionReply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DiscussionReply",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DiscussionID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DiscussionReply_source_id(ctx context.Context, field graphql.CollectedField, obj *model.DiscussionReply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DiscussionReply",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SourceID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DiscussionReply_role(ctx context.Context, field graphql.CollectedField, obj *model.DiscussionReply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DiscussionReply",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Role, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DiscussionReply_messsage(ctx context.Context, field graphql.CollectedField, obj *model.DiscussionReply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DiscussionReply",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Messsage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DiscussionReply_discussion(ctx context.Context, field graphql.CollectedField, obj *model.DiscussionReply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DiscussionReply",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Discussion, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Discussion)
+	fc.Result = res
+	return ec.marshalNDiscussion2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussion(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DiscussionReply_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.DiscussionReply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DiscussionReply",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DiscussionReply_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.DiscussionReply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DiscussionReply",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DiscussionReply_deletedAt(ctx context.Context, field graphql.CollectedField, obj *model.DiscussionReply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DiscussionReply",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _MetaData_id(ctx context.Context, field graphql.CollectedField, obj *model.MetaData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -6277,6 +7256,90 @@ func (ec *executionContext) _Mutation_checkout(ctx context.Context, field graphq
 	res := resTmp.(*model.TransactionHeader)
 	fc.Result = res
 	return ec.marshalNTransactionHeader2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐTransactionHeader(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createDiscussion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createDiscussion_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateDiscussion(rctx, args["userId"].(int), args["productId"].(int), args["content"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Discussion)
+	fc.Result = res
+	return ec.marshalNDiscussion2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussion(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createDiscussionReply(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createDiscussionReply_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateDiscussionReply(rctx, args["discussionId"].(int), args["sourceId"].(int), args["role"].(string), args["messsage"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.DiscussionReply)
+	fc.Result = res
+	return ec.marshalNDiscussionReply2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussionReply(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createOtp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -8243,6 +9306,84 @@ func (ec *executionContext) _Query_getSubCategories(ctx context.Context, field g
 	res := resTmp.([]*model.SubCategory)
 	fc.Result = res
 	return ec.marshalNSubCategory2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐSubCategoryᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getDiscussion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getDiscussion_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetDiscussion(rctx, args["productId"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Discussion)
+	fc.Result = res
+	return ec.marshalODiscussion2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussion(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getDiscussionDetail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getDiscussionDetail_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetDiscussionDetail(rctx, args["discussionId"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.DiscussionReply)
+	fc.Result = res
+	return ec.marshalODiscussionReply2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussionReply(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_products(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -16232,6 +17373,140 @@ func (ec *executionContext) _ChatDetail(ctx context.Context, sel ast.SelectionSe
 	return out
 }
 
+var discussionImplementors = []string{"Discussion"}
+
+func (ec *executionContext) _Discussion(ctx context.Context, sel ast.SelectionSet, obj *model.Discussion) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, discussionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Discussion")
+		case "id":
+			out.Values[i] = ec._Discussion_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user_id":
+			out.Values[i] = ec._Discussion_user_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "product_id":
+			out.Values[i] = ec._Discussion_product_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "content":
+			out.Values[i] = ec._Discussion_content(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user":
+			out.Values[i] = ec._Discussion_user(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "product":
+			out.Values[i] = ec._Discussion_product(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._Discussion_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Discussion_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deletedAt":
+			out.Values[i] = ec._Discussion_deletedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var discussionReplyImplementors = []string{"DiscussionReply"}
+
+func (ec *executionContext) _DiscussionReply(ctx context.Context, sel ast.SelectionSet, obj *model.DiscussionReply) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, discussionReplyImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DiscussionReply")
+		case "id":
+			out.Values[i] = ec._DiscussionReply_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "discussion_id":
+			out.Values[i] = ec._DiscussionReply_discussion_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "source_id":
+			out.Values[i] = ec._DiscussionReply_source_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "role":
+			out.Values[i] = ec._DiscussionReply_role(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "messsage":
+			out.Values[i] = ec._DiscussionReply_messsage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "discussion":
+			out.Values[i] = ec._DiscussionReply_discussion(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._DiscussionReply_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._DiscussionReply_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deletedAt":
+			out.Values[i] = ec._DiscussionReply_deletedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var metaDataImplementors = []string{"MetaData"}
 
 func (ec *executionContext) _MetaData(ctx context.Context, sel ast.SelectionSet, obj *model.MetaData) graphql.Marshaler {
@@ -16326,6 +17601,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "checkout":
 			out.Values[i] = ec._Mutation_checkout(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createDiscussion":
+			out.Values[i] = ec._Mutation_createDiscussion(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createDiscussionReply":
+			out.Values[i] = ec._Mutation_createDiscussionReply(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -16772,6 +18057,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			})
+		case "getDiscussion":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getDiscussion(ctx, field)
+				return res
+			})
+		case "getDiscussionDetail":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getDiscussionDetail(ctx, field)
 				return res
 			})
 		case "products":
@@ -18659,6 +19966,34 @@ func (ec *executionContext) marshalNDate2string(ctx context.Context, sel ast.Sel
 	return res
 }
 
+func (ec *executionContext) marshalNDiscussion2githubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussion(ctx context.Context, sel ast.SelectionSet, v model.Discussion) graphql.Marshaler {
+	return ec._Discussion(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDiscussion2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussion(ctx context.Context, sel ast.SelectionSet, v *model.Discussion) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Discussion(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNDiscussionReply2githubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussionReply(ctx context.Context, sel ast.SelectionSet, v model.DiscussionReply) graphql.Marshaler {
+	return ec._DiscussionReply(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDiscussionReply2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussionReply(ctx context.Context, sel ast.SelectionSet, v *model.DiscussionReply) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._DiscussionReply(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNInsertMetaData2githubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐInsertMetaData(ctx context.Context, v interface{}) (model.InsertMetaData, error) {
 	res, err := ec.unmarshalInputInsertMetaData(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -19752,6 +21087,102 @@ func (ec *executionContext) marshalOCart2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑ
 		return graphql.Null
 	}
 	return ec._Cart(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalODiscussion2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussion(ctx context.Context, sel ast.SelectionSet, v []*model.Discussion) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalODiscussion2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussion(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalODiscussion2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussion(ctx context.Context, sel ast.SelectionSet, v *model.Discussion) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Discussion(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalODiscussionReply2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussionReply(ctx context.Context, sel ast.SelectionSet, v []*model.DiscussionReply) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalODiscussionReply2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussionReply(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalODiscussionReply2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussionReply(ctx context.Context, sel ast.SelectionSet, v *model.DiscussionReply) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DiscussionReply(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOFilter2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐFilter(ctx context.Context, v interface{}) (*model.Filter, error) {

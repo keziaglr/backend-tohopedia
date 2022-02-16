@@ -1,101 +1,29 @@
-package graph
-
-// This file will be automatically regenerated based on the schema, any resolver implementations
-// will be copied through when generating and any unknown code will be moved to the end.
+package model
 
 import (
-	"context"
-	"errors"
 	"time"
-
-	"github.com/keziaglr/backend-tohopedia/graph/model"
-	"gorm.io/gorm"
 )
 
-func (r *mutationResolver) CreateCart(ctx context.Context, userID int, productID int, qty int, note string) (*model.Cart, error) {
-	var cart *model.Cart
-	err := r.DB.Where("user_id = ? AND product_id = ?", userID, productID).First(&cart).Error
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		if qty > 0 {
-			cart1 := model.Cart{
-				UserID:    userID,
-				ProductID: productID,
-				Qty:       qty,
-				Note:      note,
-			}
-			r.DB.Create(&cart1)
-			return &cart1, nil
-		}
-	} else if cart != nil {
-		var cartQty = cart.Qty
-		cartQty += qty
-		if cartQty <= 0 {
-			r.DB.Where("user_id = ? AND product_id = ?", userID, productID).Delete(&cart)
-		} else {
-			cart.Qty = cartQty
-			r.DB.Save(&cart)
-		}
-		return cart, nil
-	}
-
-	return nil, nil
+type Discussion struct {
+	ID          int       `json:"id"`
+	UserID      int       `json:"user_id"`
+	ProductID   int       `json:"product_id"`
+	Content     string    `json:"content"`
+	User        *User     `json:"user" gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Product     *Product  `json:"product" gorm:"foreignKey:ProductID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	DeletedAt   time.Time `json:"deletedAt"`
 }
 
-func (r *mutationResolver) DeleteCart(ctx context.Context, userID int, productID int) (*model.Cart, error) {
-	var cart *model.Cart
-	r.DB.Where("user_id = ? AND product_id = ?", userID, productID).First(&cart)
-
-	if cart != nil {
-		r.DB.Where("user_id = ? AND product_id = ?", userID, productID).Delete(&cart)
-		return cart, nil
-	}
-
-	return nil, nil
-}
-
-func (r *mutationResolver) Checkout(ctx context.Context, userID int, transactionType string, paymentMethod string, shippingAddress string, paymentDiscount int) (*model.TransactionHeader, error) {
-	var cart *model.Cart
-	r.DB.Where("user_id = ?", userID).Scan(&cart)
-
-	// var productID := cart.Product
-	// var qty := cart.Qty
-
-	transaction := model.TransactionHeader{
-		UserID:          userID,
-		TransactionType: transactionType,
-		TransactionDate: time.Now(),
-		Status:          "Berlangsung",
-		InvoiceNumber:   StringRandom(10),
-		PaymentMethod:   paymentMethod,
-		ShippingAddress: shippingAddress,
-		PaymentDiscount: paymentDiscount,
-		VoucherID:       voucherId,
-	}
-
-	// for i := 0; i < len(cart.ProductID)-1; i++ {
-	// 	detail = model.TransactionDetail{
-	// 		ProductID:     cart.ProductID,
-	// 		Qty:           cart.Qty,
-	// 		TransactionID: transaction.ID,
-	// 	}
-	// 	r.DB.Create(&detail)
-	// }
-
-	r.DB.Create(&transaction)
-	r.DB.Where("user_id = ? AND product_id IN ?", userID, productID).Delete(&cart)
-
-	return &transaction, nil
-}
-
-func (r *queryResolver) Carts(ctx context.Context, userID int) ([]*model.Product, error) {
-	var products []*model.Product
-	r.DB.Select("DISTINCT products.*").Table("products").Joins("join carts on carts.product_id = products.id").Where("user_id = ?", userID).Preload("Images").Find(&products)
-	return products, nil
-}
-
-func (r *queryResolver) Carts2(ctx context.Context, userID int) ([]*model.Cart, error) {
-	var carts []*model.Cart
-	r.DB.Select("DISTINCT carts.*").Table("products").Joins("join carts on carts.product_id = products.id").Where("user_id = ?", userID).Preload("Images").Find(&carts)
-	return carts, nil
+type DiscussionReply struct {
+	ID           int         `json:"id"`
+	DiscussionID int         `json:"discussion_id"`
+	SourceID     int         `json:"source_id"`
+	Role         string      `json:"role"`
+	Messsage     string      `json:"messsage"`
+	Discussion   *Discussion `json:"discussion" gorm:"foreignKey:DiscussionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	CreatedAt    time.Time   `json:"createdAt"`
+	UpdatedAt    time.Time   `json:"updatedAt"`
+	DeletedAt    time.Time   `json:"deletedAt"`
 }

@@ -9,7 +9,6 @@ type Discussion struct {
 	UserID      int       `json:"user_id"`
 	ProductID   int       `json:"product_id"`
 	Content     string    `json:"content"`
-	Description string    `json:"description"`
 	User        *User     `json:"user" gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Product     *Product  `json:"product" gorm:"foreignKey:ProductID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	CreatedAt   time.Time `json:"createdAt"`

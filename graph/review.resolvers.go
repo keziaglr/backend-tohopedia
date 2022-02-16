@@ -10,6 +10,14 @@ import (
 )
 
 func (r *mutationResolver) CreateReview(ctx context.Context, userID int, transactionID int, score int, description string, image string, typeReview string) (*model.Review, error) {
+	var t *model.TransactionHeader
+	r.DB.Where("id=?",transactionID).Find(&t)
+
+	if t != nil {
+		t.Status = "Telah Dinilai"
+		r.DB.Save(&t);
+	}
+
 	review := model.Review{
 		UserID:      userID,
 		Score:       score,
@@ -29,6 +37,7 @@ func (r *mutationResolver) CreateReview(ctx context.Context, userID int, transac
 }
 
 func (r *mutationResolver) CreateReviewReply(ctx context.Context, reviewID int, sourceID int, role string, messsage string) (*model.ReviewReply, error) {
+
 	review := model.ReviewReply{
 		ReviewID: reviewID,
 		SourceID: sourceID,
@@ -44,7 +53,7 @@ func (r *queryResolver) GetReviewsByType(ctx context.Context, productID int, typ
 	var review []*model.Review
 	var temp = r.DB.Select("reviews.*").Table("reviews").Joins("join product_review on product_review.review_id = reviews.id").Where("product_review.product_id = ?", productID)
 
-	if filter != ""{
+	if filter != "" {
 		if filter == "1" || filter == "2" || filter == "3" || filter == "4" || filter == "5" {
 			temp.Where("score = ?", filter)
 		} else if filter == "img" {
