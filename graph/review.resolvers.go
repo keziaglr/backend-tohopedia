@@ -11,11 +11,11 @@ import (
 
 func (r *mutationResolver) CreateReview(ctx context.Context, userID int, transactionID int, score int, description string, image string, typeReview string) (*model.Review, error) {
 	var t *model.TransactionHeader
-	r.DB.Where("id=?",transactionID).Find(&t)
+	r.DB.Where("id=?", transactionID).Find(&t)
 
 	if t != nil {
 		t.Status = "Telah Dinilai"
-		r.DB.Save(&t);
+		r.DB.Save(&t)
 	}
 
 	review := model.Review{
@@ -37,7 +37,6 @@ func (r *mutationResolver) CreateReview(ctx context.Context, userID int, transac
 }
 
 func (r *mutationResolver) CreateReviewReply(ctx context.Context, reviewID int, sourceID int, role string, messsage string) (*model.ReviewReply, error) {
-
 	review := model.ReviewReply{
 		ReviewID: reviewID,
 		SourceID: sourceID,

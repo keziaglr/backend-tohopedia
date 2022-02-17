@@ -67,6 +67,13 @@ func (r *mutationResolver) AuthUser(ctx context.Context, input model.AuthUser) (
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, id int, input model.UpdateUser) (*model.User, error) {
+	r.DB.Exec("DELETE shipping_addresses FROM shipping_addresses JOIN user_address WHERE shipping_addresses.id = user_address.shipping_address_id AND user_address.user_id = ?", id)
+
+	var userAddress []*model.ShippingAddress
+	for i := 0; i < len(input.Address); i++ {
+		userAddress = append(userAddress, &model.ShippingAddress{Address: input.Address[i]})
+	}
+
 	var user *model.User
 	r.DB.Where("id = ?", id).First(&user)
 
@@ -77,6 +84,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id int, input model.U
 		user.Gender = input.Gender
 		user.Email = input.Email
 		user.PhoneNumber = input.PhoneNumber
+		user.ShippingAddress = userAddress
 		r.DB.Save(&user)
 		return user, nil
 	}

@@ -1,0 +1,9 @@
+type TopUp{
+    id: Int!
+    value: Int!
+    code: String!
+}
+
+extend type Mutation{
+    topup(code: String!, value: Int!, userId: Int!): TopUp
+}

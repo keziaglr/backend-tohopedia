@@ -90,6 +90,7 @@ type ComplexityRoot struct {
 		ChatID    func(childComplexity int) int
 		CreatedAt func(childComplexity int) int
 		DeletedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
 		Image     func(childComplexity int) int
 		Message   func(childComplexity int) int
 		Role      func(childComplexity int) int
@@ -132,9 +133,11 @@ type ComplexityRoot struct {
 		AuthUser              func(childComplexity int, input model.AuthUser) int
 		Checkout              func(childComplexity int, userID int, transactionType string, paymentMethod string, shippingAddress string, paymentDiscount int, voucherID *int, shippingID int, total int, input model.CartProduct) int
 		CreateCart            func(childComplexity int, userID int, productID int, qty int, note string) int
+		CreateChat            func(childComplexity int, userID int, shopID int, sourceID int, role string, message string, image string, typeArg string) int
 		CreateDiscussion      func(childComplexity int, userID int, productID int, content string) int
 		CreateDiscussionReply func(childComplexity int, discussionID int, sourceID int, role string, messsage string) int
 		CreateGlobalVoucher   func(childComplexity int, input model.CreateVoucher) int
+		CreateHeaderChat      func(childComplexity int, userID int, shopID int) int
 		CreateOtp             func(childComplexity int, email string) int
 		CreateReview          func(childComplexity int, userID int, transactionID int, score int, description string, image string, typeReview string) int
 		CreateReviewReply     func(childComplexity int, reviewID int, sourceID int, role string, messsage string) int
@@ -150,6 +153,7 @@ type ComplexityRoot struct {
 		ResetPassword         func(childComplexity int, input model.AuthUser) int
 		ResponseRequest       func(childComplexity int, userID int, status bool, requestID int) int
 		SendRequest           func(childComplexity int, userID int, status string) int
+		Topup                 func(childComplexity int, code string, value int, userID int) int
 		UpdateProduct         func(childComplexity int, productID int, shopID int, name string, categoryID int, images []string, description string, price int, discount *int, input model.InsertMetaData) int
 		UpdateShop            func(childComplexity int, id int, input model.UpdateShop) int
 		UpdateStatusUser      func(childComplexity int, userID int, status bool) int
@@ -198,6 +202,8 @@ type ComplexityRoot struct {
 		Categories              func(childComplexity int) int
 		GetBadge                func(childComplexity int, shopID int) int
 		GetBestSellingProducts  func(childComplexity int, shopID int) int
+		GetChat                 func(childComplexity int, userID int) int
+		GetChatDetail           func(childComplexity int, chatID int) int
 		GetDiscussion           func(childComplexity int, productID int) int
 		GetDiscussionDetail     func(childComplexity int, discussionID int) int
 		GetProductByID          func(childComplexity int, id int) int
@@ -344,6 +350,12 @@ type ComplexityRoot struct {
 		Name       func(childComplexity int) int
 	}
 
+	TopUp struct {
+		Code  func(childComplexity int) int
+		ID    func(childComplexity int) int
+		Value func(childComplexity int) int
+	}
+
 	TransactionDetail struct {
 		CreatedAt     func(childComplexity int) int
 		DeletedAt     func(childComplexity int) int
@@ -438,6 +450,8 @@ type MutationResolver interface {
 	CreateCart(ctx context.Context, userID int, productID int, qty int, note string) (*model.Cart, error)
 	DeleteCart(ctx context.Context, userID int, productID int) (*model.Cart, error)
 	Checkout(ctx context.Context, userID int, transactionType string, paymentMethod string, shippingAddress string, paymentDiscount int, voucherID *int, shippingID int, total int, input model.CartProduct) (*model.TransactionHeader, error)
+	CreateHeaderChat(ctx context.Context, userID int, shopID int) (*model.Chat, error)
+	CreateChat(ctx context.Context, userID int, shopID int, sourceID int, role string, message string, image string, typeArg string) (*model.Chat, error)
 	CreateDiscussion(ctx context.Context, userID int, productID int, content string) (*model.Discussion, error)
 	CreateDiscussionReply(ctx context.Context, discussionID int, sourceID int, role string, messsage string) (*model.DiscussionReply, error)
 	CreateOtp(ctx context.Context, email string) (string, error)
@@ -451,6 +465,7 @@ type MutationResolver interface {
 	CreateReviewReply(ctx context.Context, reviewID int, sourceID int, role string, messsage string) (*model.ReviewReply, error)
 	CreateShop(ctx context.Context, input model.CreateShop) (*model.Shop, error)
 	UpdateShop(ctx context.Context, id int, input model.UpdateShop) (*model.Shop, error)
+	Topup(ctx context.Context, code string, value int, userID int) (*model.TopUp, error)
 	CreateUserVoucher(ctx context.Context, voucherID int, userID int) (*model.UserVoucher, error)
 	CreateShopVoucher(ctx context.Context, shopID int, input model.CreateVoucher) (*model.Voucher, error)
 	CreateGlobalVoucher(ctx context.Context, input model.CreateVoucher) (*model.Voucher, error)
@@ -468,6 +483,8 @@ type QueryResolver interface {
 	Carts2(ctx context.Context, userID int) ([]*model.Cart, error)
 	Categories(ctx context.Context) ([]*model.Category, error)
 	GetSubCategories(ctx context.Context, categoryID int) ([]*model.SubCategory, error)
+	GetChat(ctx context.Context, userID int) ([]*model.Chat, error)
+	GetChatDetail(ctx context.Context, chatID int) ([]*model.ChatDetail, error)
 	GetDiscussion(ctx context.Context, productID int) ([]*model.Discussion, error)
 	GetDiscussionDetail(ctx context.Context, discussionID int) ([]*model.DiscussionReply, error)
 	Products(ctx context.Context) ([]*model.Product, error)
@@ -724,6 +741,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ChatDetail.DeletedAt(childComplexity), true
 
+	case "ChatDetail.id":
+		if e.complexity.ChatDetail.ID == nil {
+			break
+		}
+
+		return e.complexity.ChatDetail.ID(childComplexity), true
+
 	case "ChatDetail.image":
 		if e.complexity.ChatDetail.Image == nil {
 			break
@@ -949,6 +973,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateCart(childComplexity, args["userId"].(int), args["productId"].(int), args["qty"].(int), args["note"].(string)), true
 
+	case "Mutation.createChat":
+		if e.complexity.Mutation.CreateChat == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createChat_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateChat(childComplexity, args["userId"].(int), args["shopId"].(int), args["sourceId"].(int), args["role"].(string), args["message"].(string), args["image"].(string), args["type"].(string)), true
+
 	case "Mutation.createDiscussion":
 		if e.complexity.Mutation.CreateDiscussion == nil {
 			break
@@ -984,6 +1020,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateGlobalVoucher(childComplexity, args["input"].(model.CreateVoucher)), true
+
+	case "Mutation.createHeaderChat":
+		if e.complexity.Mutation.CreateHeaderChat == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createHeaderChat_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateHeaderChat(childComplexity, args["userId"].(int), args["shopId"].(int)), true
 
 	case "Mutation.createOtp":
 		if e.complexity.Mutation.CreateOtp == nil {
@@ -1164,6 +1212,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SendRequest(childComplexity, args["userId"].(int), args["status"].(string)), true
+
+	case "Mutation.topup":
+		if e.complexity.Mutation.Topup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_topup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Topup(childComplexity, args["code"].(string), args["value"].(int), args["userId"].(int)), true
 
 	case "Mutation.updateProduct":
 		if e.complexity.Mutation.UpdateProduct == nil {
@@ -1456,6 +1516,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetBestSellingProducts(childComplexity, args["shopId"].(int)), true
+
+	case "Query.getChat":
+		if e.complexity.Query.GetChat == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getChat_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetChat(childComplexity, args["userId"].(int)), true
+
+	case "Query.getChatDetail":
+		if e.complexity.Query.GetChatDetail == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getChatDetail_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetChatDetail(childComplexity, args["chatId"].(int)), true
 
 	case "Query.getDiscussion":
 		if e.complexity.Query.GetDiscussion == nil {
@@ -2379,6 +2463,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SubCategory.Name(childComplexity), true
 
+	case "TopUp.code":
+		if e.complexity.TopUp.Code == nil {
+			break
+		}
+
+		return e.complexity.TopUp.Code(childComplexity), true
+
+	case "TopUp.id":
+		if e.complexity.TopUp.ID == nil {
+			break
+		}
+
+		return e.complexity.TopUp.ID(childComplexity), true
+
+	case "TopUp.value":
+		if e.complexity.TopUp.Value == nil {
+			break
+		}
+
+		return e.complexity.TopUp.Value(childComplexity), true
+
 	case "TransactionDetail.createdAt":
 		if e.complexity.TransactionDetail.CreatedAt == nil {
 			break
@@ -2980,19 +3085,30 @@ type Chat{
 }
 
 type ChatDetail{
+    id: Int!
     chat_id: Int!
     source_id: Int!
 
     chat: Chat!
     role: String!
 
-    message: String
-    image: String
+    message: String!
+    image: String!
     type: String!
 
     createdAt: Time!
     updatedAt: Time!
     deletedAt: Time!
+}
+
+extend type Mutation{
+    createHeaderChat(userId: Int!, shopId: Int!) : Chat!
+    createChat(userId: Int!, shopId: Int!, sourceId:Int!, role:String!, message:String!, image:String!, type:String!): Chat!
+} 
+
+extend type Query{
+    getChat(userId: Int!): [Chat]
+    getChatDetail(chatId: Int!): [ChatDetail]
 }`, BuiltIn: false},
 	{Name: "graph/discussion.graphqls", Input: `type Discussion{
     id: Int!
@@ -3275,6 +3391,15 @@ extend type Query{
     getPromoByShop(shopId: Int!): [ShopPromo]!
     getShopByUser(userId: Int!): Shop
 }`, BuiltIn: false},
+	{Name: "graph/topup.graphqls", Input: `type TopUp{
+    id: Int!
+    value: Int!
+    code: String!
+}
+
+extend type Mutation{
+    topup(code: String!, value: Int!, userId: Int!): TopUp
+}`, BuiltIn: false},
 	{Name: "graph/transaction.graphqls", Input: `type TransactionHeader{
     id: Int!
     user_id: Int!
@@ -3387,7 +3512,7 @@ input UpdateUser{
     gender: String!
     email: String!
     phoneNumber: String!
-    address: [String]!
+    address: [String!]
 }
 
 type Query {
@@ -3590,6 +3715,75 @@ func (ec *executionContext) field_Mutation_createCart_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createChat_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userId"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["shopId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("shopId"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["shopId"] = arg1
+	var arg2 int
+	if tmp, ok := rawArgs["sourceId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceId"))
+		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sourceId"] = arg2
+	var arg3 string
+	if tmp, ok := rawArgs["role"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
+		arg3, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["role"] = arg3
+	var arg4 string
+	if tmp, ok := rawArgs["message"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
+		arg4, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["message"] = arg4
+	var arg5 string
+	if tmp, ok := rawArgs["image"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("image"))
+		arg5, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["image"] = arg5
+	var arg6 string
+	if tmp, ok := rawArgs["type"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+		arg6, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg6
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createDiscussionReply_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3677,6 +3871,30 @@ func (ec *executionContext) field_Mutation_createGlobalVoucher_args(ctx context.
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createHeaderChat_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userId"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["shopId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("shopId"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["shopId"] = arg1
 	return args, nil
 }
 
@@ -4112,6 +4330,39 @@ func (ec *executionContext) field_Mutation_sendRequest_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_topup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["code"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("code"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["code"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["value"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["value"] = arg1
+	var arg2 int
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userId"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -4343,6 +4594,36 @@ func (ec *executionContext) field_Query_getBestSellingProducts_args(ctx context.
 		}
 	}
 	args["shopId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getChatDetail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["chatId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("chatId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["chatId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getChat_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userId"] = arg0
 	return args, nil
 }
 
@@ -5801,6 +6082,41 @@ func (ec *executionContext) _Chat_deletedAt(ctx context.Context, field graphql.C
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _ChatDetail_id(ctx context.Context, field graphql.CollectedField, obj *model.ChatDetail) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ChatDetail",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ChatDetail_chat_id(ctx context.Context, field graphql.CollectedField, obj *model.ChatDetail) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5966,11 +6282,14 @@ func (ec *executionContext) _ChatDetail_message(ctx context.Context, field graph
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ChatDetail_image(ctx context.Context, field graphql.CollectedField, obj *model.ChatDetail) (ret graphql.Marshaler) {
@@ -5998,11 +6317,14 @@ func (ec *executionContext) _ChatDetail_image(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ChatDetail_type(ctx context.Context, field graphql.CollectedField, obj *model.ChatDetail) (ret graphql.Marshaler) {
@@ -7258,6 +7580,90 @@ func (ec *executionContext) _Mutation_checkout(ctx context.Context, field graphq
 	return ec.marshalNTransactionHeader2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐTransactionHeader(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createHeaderChat(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createHeaderChat_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateHeaderChat(rctx, args["userId"].(int), args["shopId"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Chat)
+	fc.Result = res
+	return ec.marshalNChat2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐChat(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createChat(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createChat_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateChat(rctx, args["userId"].(int), args["shopId"].(int), args["sourceId"].(int), args["role"].(string), args["message"].(string), args["image"].(string), args["type"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Chat)
+	fc.Result = res
+	return ec.marshalNChat2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐChat(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createDiscussion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -7799,6 +8205,45 @@ func (ec *executionContext) _Mutation_updateShop(ctx context.Context, field grap
 	res := resTmp.(*model.Shop)
 	fc.Result = res
 	return ec.marshalNShop2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐShop(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_topup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_topup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Topup(rctx, args["code"].(string), args["value"].(int), args["userId"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.TopUp)
+	fc.Result = res
+	return ec.marshalOTopUp2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐTopUp(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createUserVoucher(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -9306,6 +9751,84 @@ func (ec *executionContext) _Query_getSubCategories(ctx context.Context, field g
 	res := resTmp.([]*model.SubCategory)
 	fc.Result = res
 	return ec.marshalNSubCategory2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐSubCategoryᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getChat(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getChat_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetChat(rctx, args["userId"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Chat)
+	fc.Result = res
+	return ec.marshalOChat2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐChat(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getChatDetail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getChatDetail_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetChatDetail(rctx, args["chatId"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ChatDetail)
+	fc.Result = res
+	return ec.marshalOChatDetail2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐChatDetail(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getDiscussion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -13183,6 +13706,111 @@ func (ec *executionContext) _SubCategory_category(ctx context.Context, field gra
 	return ec.marshalNCategory2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐCategory(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _TopUp_id(ctx context.Context, field graphql.CollectedField, obj *model.TopUp) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TopUp",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TopUp_value(ctx context.Context, field graphql.CollectedField, obj *model.TopUp) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TopUp",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TopUp_code(ctx context.Context, field graphql.CollectedField, obj *model.TopUp) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TopUp",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _TransactionDetail_id(ctx context.Context, field graphql.CollectedField, obj *model.TransactionDetail) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -17049,7 +17677,7 @@ func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("address"))
-			it.Address, err = ec.unmarshalNString2ᚕᚖstring(ctx, v)
+			it.Address, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -17318,6 +17946,11 @@ func (ec *executionContext) _ChatDetail(ctx context.Context, sel ast.SelectionSe
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ChatDetail")
+		case "id":
+			out.Values[i] = ec._ChatDetail_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "chat_id":
 			out.Values[i] = ec._ChatDetail_chat_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -17340,8 +17973,14 @@ func (ec *executionContext) _ChatDetail(ctx context.Context, sel ast.SelectionSe
 			}
 		case "message":
 			out.Values[i] = ec._ChatDetail_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "image":
 			out.Values[i] = ec._ChatDetail_image(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "type":
 			out.Values[i] = ec._ChatDetail_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -17604,6 +18243,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createHeaderChat":
+			out.Values[i] = ec._Mutation_createHeaderChat(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createChat":
+			out.Values[i] = ec._Mutation_createChat(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createDiscussion":
 			out.Values[i] = ec._Mutation_createDiscussion(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -17666,6 +18315,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "topup":
+			out.Values[i] = ec._Mutation_topup(ctx, field)
 		case "createUserVoucher":
 			out.Values[i] = ec._Mutation_createUserVoucher(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -18057,6 +18708,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			})
+		case "getChat":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getChat(ctx, field)
+				return res
+			})
+		case "getChatDetail":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getChatDetail(ctx, field)
 				return res
 			})
 		case "getDiscussion":
@@ -19063,6 +19736,43 @@ func (ec *executionContext) _SubCategory(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var topUpImplementors = []string{"TopUp"}
+
+func (ec *executionContext) _TopUp(ctx context.Context, sel ast.SelectionSet, obj *model.TopUp) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, topUpImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TopUp")
+		case "id":
+			out.Values[i] = ec._TopUp_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "value":
+			out.Values[i] = ec._TopUp_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "code":
+			out.Values[i] = ec._TopUp_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var transactionDetailImplementors = []string{"TransactionDetail"}
 
 func (ec *executionContext) _TransactionDetail(ctx context.Context, sel ast.SelectionSet, obj *model.TransactionDetail) graphql.Marshaler {
@@ -19929,6 +20639,10 @@ func (ec *executionContext) marshalNCategory2ᚖgithubᚗcomᚋkeziaglrᚋbacken
 		return graphql.Null
 	}
 	return ec._Category(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNChat2githubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐChat(ctx context.Context, sel ast.SelectionSet, v model.Chat) graphql.Marshaler {
+	return ec._Chat(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNChat2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐChat(ctx context.Context, sel ast.SelectionSet, v *model.Chat) graphql.Marshaler {
@@ -21089,6 +21803,102 @@ func (ec *executionContext) marshalOCart2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑ
 	return ec._Cart(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOChat2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐChat(ctx context.Context, sel ast.SelectionSet, v []*model.Chat) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOChat2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐChat(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOChat2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐChat(ctx context.Context, sel ast.SelectionSet, v *model.Chat) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Chat(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOChatDetail2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐChatDetail(ctx context.Context, sel ast.SelectionSet, v []*model.ChatDetail) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOChatDetail2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐChatDetail(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOChatDetail2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐChatDetail(ctx context.Context, sel ast.SelectionSet, v *model.ChatDetail) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ChatDetail(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalODiscussion2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐDiscussion(ctx context.Context, sel ast.SelectionSet, v []*model.Discussion) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -21598,6 +22408,48 @@ func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.S
 	return graphql.MarshalString(v)
 }
 
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
 	if v == nil {
 		return nil, nil
@@ -21647,6 +22499,13 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
+}
+
+func (ec *executionContext) marshalOTopUp2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐTopUp(ctx context.Context, sel ast.SelectionSet, v *model.TopUp) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TopUp(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOTransactionDetail2ᚕᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐTransactionDetailᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.TransactionDetail) graphql.Marshaler {

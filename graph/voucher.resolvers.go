@@ -10,13 +10,19 @@ import (
 )
 
 func (r *mutationResolver) CreateUserVoucher(ctx context.Context, voucherID int, userID int) (*model.UserVoucher, error) {
-	userVoucher := model.UserVoucher{
-		VoucherID: voucherID,
-		UserID:    userID,
-	}
+	var userv *model.UserVoucher
+	r.DB.Debug().First(&userv, "voucher_id=? AND user_id=?", voucherID, userID)
 
-	r.DB.Create(&userVoucher)
-	return &userVoucher, nil
+	if userv == nil {
+		userVoucher := model.UserVoucher{
+			VoucherID: voucherID,
+			UserID:    userID,
+		}
+
+		r.DB.Create(&userVoucher)
+		return &userVoucher, nil
+	}
+	return nil, nil
 }
 
 func (r *mutationResolver) CreateShopVoucher(ctx context.Context, shopID int, input model.CreateVoucher) (*model.Voucher, error) {

@@ -79,8 +79,15 @@ func (r *mutationResolver) Checkout(ctx context.Context, userID int, transaction
 		}
 		r.DB.Create(&detail)
 	}
+
+	var user *model.User
+	r.DB.Where("id = ?", userID).Find(&user)
+
 	var cart *model.Cart
 	r.DB.Where("user_id = ?", userID).Delete(&cart)
+
+	user.Balance -= total
+	r.DB.Save(&user)
 	return &transaction, nil
 }
 

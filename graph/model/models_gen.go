@@ -63,6 +63,12 @@ type ShippingAddress struct {
 	Address string `json:"address"`
 }
 
+type TopUp struct {
+	ID    int    `json:"id"`
+	Value int    `json:"value"`
+	Code  string `json:"code"`
+}
+
 type UpdateShop struct {
 	ProfilePicture    string `json:"profilePicture"`
 	Name              string `json:"name"`
@@ -74,11 +80,11 @@ type UpdateShop struct {
 }
 
 type UpdateUser struct {
-	ProfilePicture string    `json:"profilePicture"`
-	Name           string    `json:"name"`
-	Dob            string    `json:"dob"`
-	Gender         string    `json:"gender"`
-	Email          string    `json:"email"`
-	PhoneNumber    string    `json:"phoneNumber"`
-	Address        []*string `json:"address"`
+	ProfilePicture string   `json:"profilePicture"`
+	Name           string   `json:"name"`
+	Dob            string   `json:"dob"`
+	Gender         string   `json:"gender"`
+	Email          string   `json:"email"`
+	PhoneNumber    string   `json:"phoneNumber"`
+	Address        []string `json:"address"`
 }

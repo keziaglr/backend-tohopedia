@@ -13,17 +13,28 @@ type Chat{
 }
 
 type ChatDetail{
+    id: Int!
     chat_id: Int!
     source_id: Int!
 
     chat: Chat!
     role: String!
 
-    message: String
-    image: String
+    message: String!
+    image: String!
     type: String!
 
     createdAt: Time!
     updatedAt: Time!
     deletedAt: Time!
+}
+
+extend type Mutation{
+    createHeaderChat(userId: Int!, shopId: Int!) : Chat!
+    createChat(userId: Int!, shopId: Int!, sourceId:Int!, role:String!, message:String!, image:String!, type:String!): Chat!
+} 
+
+extend type Query{
+    getChat(userId: Int!): [Chat]
+    getChatDetail(chatId: Int!): [ChatDetail]
 }

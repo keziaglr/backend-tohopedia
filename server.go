@@ -97,6 +97,7 @@ func migrate() {
 		&model.Review{},
 		&model.TransactionHeader{},
 		&model.TransactionDetail{},
+		&model.TopUp{},
 	)
 
 	db.Exec("DROP TABLE shop_promo, product_image")
@@ -131,6 +132,7 @@ func migrate() {
 		&model.Review{},
 		&model.TransactionHeader{},
 		&model.TransactionDetail{},
+		&model.TopUp{},
 	)
 }
 
@@ -147,6 +149,7 @@ func seedMaster() {
 			Name:           "kekez",
 			Dob:            "2021-03-03",
 			Gender:         "Female",
+			Balance:        50000000,
 			PhoneNumber:    "282892929",
 			ProfilePicture: "https://i.mydramalist.com/vK4lp_5_c.jpg",
 			IsSuspend:      false,
@@ -358,6 +361,7 @@ func seedMaster() {
 			Name:         "Voucher 1",
 			Description:  "Desc Voucher 1",
 			DiscountRate: 50,
+			Code:         graph.StringRandom(5),
 			Tnc:          "TNC Voucher 1",
 			StartTime:    time.Now().String()[0:10],
 			EndTime:      time.Now().Add(5).String()[0:10],
@@ -365,6 +369,7 @@ func seedMaster() {
 			Name:         "Voucher 2",
 			Description:  "Desc Voucher 2",
 			DiscountRate: 70,
+			Code:         graph.StringRandom(5),
 			Tnc:          "TNC Voucher 2",
 			StartTime:    time.Now().String()[0:10],
 			EndTime:      time.Now().Add(10).String()[0:10],
@@ -372,6 +377,7 @@ func seedMaster() {
 			Name:         "Voucher 3",
 			Description:  "Desc Voucher 3",
 			DiscountRate: 30,
+			Code:         graph.StringRandom(5),
 			Tnc:          "TNC Voucher 3",
 			StartTime:    time.Now().String()[0:10],
 			EndTime:      time.Now().Add(15).String()[0:10],
@@ -1084,17 +1090,17 @@ func seedMaster() {
 	review := []model.ReviewReply{
 		{
 			ReviewID: 1,
-			Role: "Shop",
+			Role:     "Shop",
 			SourceID: 1,
 			Messsage: "Thankyou dear ^^",
-		},{
+		}, {
 			ReviewID: 1,
-			Role: "User",
+			Role:     "User",
 			SourceID: 3,
 			Messsage: "Urwell :)",
-		},{
+		}, {
 			ReviewID: 2,
-			Role: "Shop",
+			Role:     "Shop",
 			SourceID: 1,
 			Messsage: "Baik kak",
 		},
@@ -1102,37 +1108,121 @@ func seedMaster() {
 
 	discussion := []model.Discussion{
 		{
-			UserID: 4,
+			UserID:    4,
 			ProductID: 1,
-			Content: "Ada warna apa aja ya?",
+			Content:   "Ada warna apa aja ya?",
 		}, {
-			UserID: 3,
+			UserID:    3,
 			ProductID: 1,
-			Content: "Ready kak?",
+			Content:   "Ready kak?",
 		},
 	}
 
 	discussionReply := []model.DiscussionReply{
 		{
 			DiscussionID: 1,
-			SourceID: 1,
-			Role: "Shop",
-			Messsage: "Grey dan Black ya kak ^^",
+			SourceID:     1,
+			Role:         "Shop",
+			Messsage:     "Grey dan Black ya kak ^^",
 		},
 		{
 			DiscussionID: 1,
-			SourceID: 4,
-			Role: "User",
-			Messsage: "Terima kasih kak",
+			SourceID:     4,
+			Role:         "User",
+			Messsage:     "Terima kasih kak",
 		},
 		{
 			DiscussionID: 2,
-			SourceID: 1,
-			Role: "Shop",
-			Messsage: "Ready ya kak ^^",
+			SourceID:     1,
+			Role:         "Shop",
+			Messsage:     "Ready ya kak ^^",
 		},
 	}
-		
+
+	chat := []model.Chat{
+		{
+			ShopID: 2,
+			UserID: 1,
+		}, {
+			ShopID: 3,
+			UserID: 1,
+		},
+	}
+
+	chatDetail := []model.ChatDetail{
+		{
+			ChatID:   1,
+			SourceID: 1,
+			Role:     "User",
+			Message:  "Halo, apakah stocknya ready ka?",
+			Image:    "null",
+			Type:     "Message",
+		}, {
+			ChatID:   1,
+			SourceID: 1,
+			Role:     "User",
+			Message:  "",
+			Image:    "https://d2xjmi1k71iy2m.cloudfront.net/dairyfarm/id/images/101/0710175_PE727378_S4.jpg",
+			Type:     "Image",
+		}, {
+			ChatID:   1,
+			SourceID: 2,
+			Role:     "Shop",
+			Message:  "Ready ka, bisa dipesan :D",
+			Image:    "",
+			Type:     "Message",
+		}, {
+			ChatID:   2,
+			SourceID: 1,
+			Role:     "User",
+			Message:  "",
+			Image:    "https://img.biggo.com.tw/sTwr1Y2HQg-UVwXisOsDRwq1wgxiWrLdbtgcEKA0Kd3c/https://images.tokopedia.net/img/cache/700/product-1/2020/3/5/batch-upload/batch-upload_b902656d-e0fa-45c8-a363-61d28a361b15.jpg",
+			Type:     "Image",
+		}, {
+			ChatID:   2,
+			SourceID: 1,
+			Role:     "User",
+			Message:  "Shadenya apa aja ya kak",
+			Image:    "",
+			Type:     "Message",
+		}, {
+			ChatID:   2,
+			SourceID: 3,
+			Role:     "Shop",
+			Message:  "Ada di description ya kak",
+			Image:    "",
+			Type:     "Message",
+		},
+	}
+
+	topup := []model.TopUp{
+		{
+			Code:  graph.StringRandom(5),
+			Value: 1000000,
+		}, {
+			Code:  graph.StringRandom(5),
+			Value: 5000000,
+		}, {
+			Code:  graph.StringRandom(5),
+			Value: 10000000,
+		}, {
+			Code:  graph.StringRandom(5),
+			Value: 15000000,
+		}, {
+			Code:  graph.StringRandom(5),
+			Value: 20000000,
+		},
+	}
+
+	userVoucher := []model.UserVoucher{
+		{
+			VoucherID: 1,
+			UserID:    1,
+		}, {
+			VoucherID: 1,
+			UserID:    2,
+		},
+	}
 
 	db.Create(&campaign)
 	db.Create(&badge)
@@ -1150,4 +1240,8 @@ func seedMaster() {
 	db.Create(&review)
 	db.Create(&discussion)
 	db.Create(&discussionReply)
+	db.Create(&chat)
+	db.Create(&chatDetail)
+	db.Create(&topup)
+	db.Create(&userVoucher)
 }
