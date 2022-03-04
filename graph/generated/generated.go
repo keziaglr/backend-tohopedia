@@ -210,7 +210,7 @@ type ComplexityRoot struct {
 		GetProductsByCategories func(childComplexity int, categoryID int) int
 		GetProductsByShop       func(childComplexity int, shopID int) int
 		GetProductsMatch        func(childComplexity int, search string) int
-		GetProductsSearch       func(childComplexity int, search string, sort *string, input *model.Filter) int
+		GetProductsSearch       func(childComplexity int, offset int, limit int, search string, sort *string, input *model.Filter) int
 		GetProductsTopDisc      func(childComplexity int) int
 		GetPromoByShop          func(childComplexity int, shopID int) int
 		GetReviewDetail         func(childComplexity int, reviewID int) int
@@ -234,7 +234,7 @@ type ComplexityRoot struct {
 		GetVoucherByID          func(childComplexity int, voucherID int) int
 		GetVoucherByProduct     func(childComplexity int, productID int) int
 		GetVoucherCart          func(childComplexity int, userID int) int
-		Products                func(childComplexity int) int
+		Products                func(childComplexity int, offset int, limit int) int
 		Requests                func(childComplexity int) int
 		Users                   func(childComplexity int) int
 		Vendors                 func(childComplexity int) int
@@ -487,12 +487,12 @@ type QueryResolver interface {
 	GetChatDetail(ctx context.Context, chatID int) ([]*model.ChatDetail, error)
 	GetDiscussion(ctx context.Context, productID int) ([]*model.Discussion, error)
 	GetDiscussionDetail(ctx context.Context, discussionID int) ([]*model.DiscussionReply, error)
-	Products(ctx context.Context) ([]*model.Product, error)
+	Products(ctx context.Context, offset int, limit int) ([]*model.Product, error)
 	GetProductByID(ctx context.Context, id int) (*model.Product, error)
 	GetProductsByShop(ctx context.Context, shopID int) ([]*model.Product, error)
 	GetProductsTopDisc(ctx context.Context) ([]*model.Product, error)
 	GetProductsByCategories(ctx context.Context, categoryID int) ([]*model.Product, error)
-	GetProductsSearch(ctx context.Context, search string, sort *string, input *model.Filter) ([]*model.Product, error)
+	GetProductsSearch(ctx context.Context, offset int, limit int, search string, sort *string, input *model.Filter) ([]*model.Product, error)
 	GetProductsMatch(ctx context.Context, search string) ([]*model.Product, error)
 	GetBestSellingProducts(ctx context.Context, shopID int) ([]*model.Product, error)
 	Requests(ctx context.Context) ([]*model.Request, error)
@@ -1623,7 +1623,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetProductsSearch(childComplexity, args["search"].(string), args["sort"].(*string), args["input"].(*model.Filter)), true
+		return e.complexity.Query.GetProductsSearch(childComplexity, args["offset"].(int), args["limit"].(int), args["search"].(string), args["sort"].(*string), args["input"].(*model.Filter)), true
 
 	case "Query.getProductsTopDisc":
 		if e.complexity.Query.GetProductsTopDisc == nil {
@@ -1901,7 +1901,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.Products(childComplexity), true
+		args, err := ec.field_Query_products_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Products(childComplexity, args["offset"].(int), args["limit"].(int)), true
 
 	case "Query.requests":
 		if e.complexity.Query.Requests == nil {
@@ -3207,12 +3212,12 @@ input Filter{
 }
 
 extend type Query{
-    products: [Product!]!
+    products(offset: Int!, limit: Int!): [Product!]!
     getProductById(id: Int!): Product!
     getProductsByShop(shopID: Int!): [Product!]!
     getProductsTopDisc: [Product!]!
     getProductsByCategories(categoryId: Int!): [Product!]!
-    getProductsSearch(search: String!, sort: String, input: Filter): [Product!]!
+    getProductsSearch(offset: Int!, limit: Int!, search: String!, sort: String, input: Filter): [Product!]!
     getProductsMatch(search: String!): [Product!]!
     getBestSellingProducts(shopId: Int!): [Product!]!
 }
@@ -4720,33 +4725,51 @@ func (ec *executionContext) field_Query_getProductsMatch_args(ctx context.Contex
 func (ec *executionContext) field_Query_getProductsSearch_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 int
+	if tmp, ok := rawArgs["offset"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["limit"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg1
+	var arg2 string
 	if tmp, ok := rawArgs["search"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["search"] = arg0
-	var arg1 *string
+	args["search"] = arg2
+	var arg3 *string
 	if tmp, ok := rawArgs["sort"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sort"))
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["sort"] = arg1
-	var arg2 *model.Filter
+	args["sort"] = arg3
+	var arg4 *model.Filter
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg2, err = ec.unmarshalOFilter2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐFilter(ctx, tmp)
+		arg4, err = ec.unmarshalOFilter2ᚖgithubᚗcomᚋkeziaglrᚋbackendᚑtohopediaᚋgraphᚋmodelᚐFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg2
+	args["input"] = arg4
 	return args, nil
 }
 
@@ -5131,6 +5154,30 @@ func (ec *executionContext) field_Query_getVoucherCart_args(ctx context.Context,
 		}
 	}
 	args["userId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_products_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["offset"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["limit"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg1
 	return args, nil
 }
 
@@ -9925,9 +9972,16 @@ func (ec *executionContext) _Query_products(ctx context.Context, field graphql.C
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_products_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Products(rctx)
+		return ec.resolvers.Query().Products(rctx, args["offset"].(int), args["limit"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10130,7 +10184,7 @@ func (ec *executionContext) _Query_getProductsSearch(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetProductsSearch(rctx, args["search"].(string), args["sort"].(*string), args["input"].(*model.Filter))
+		return ec.resolvers.Query().GetProductsSearch(rctx, args["offset"].(int), args["limit"].(int), args["search"].(string), args["sort"].(*string), args["input"].(*model.Filter))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

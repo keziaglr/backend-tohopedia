@@ -79,9 +79,9 @@ func (r *mutationResolver) DeleteProduct(ctx context.Context, productID int) (*m
 	return &product, nil
 }
 
-func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
+func (r *queryResolver) Products(ctx context.Context, offset int, limit int) ([]*model.Product, error) {
 	var products []*model.Product
-	r.DB.Find(&products)
+	r.DB.Offset(offset).Limit(limit).Preload("Images").Find(&products)
 	return products, nil
 }
 
@@ -109,7 +109,7 @@ func (r *queryResolver) GetProductsByCategories(ctx context.Context, categoryID 
 	return products, nil
 }
 
-func (r *queryResolver) GetProductsSearch(ctx context.Context, search string, sort *string, input *model.Filter) ([]*model.Product, error) {
+func (r *queryResolver) GetProductsSearch(ctx context.Context, offset int, limit int, search string, sort *string, input *model.Filter) ([]*model.Product, error) {
 	var products []*model.Product
 	var name = "%" + search + "%"
 	var temp = r.DB.Select("DISTINCT products.*").Table("shops").Joins("join shop_product on shops.id = shop_product.shop_id").Joins("join products on products.id = shop_product.product_id").Joins("join product_image on products.id = product_image.product_id").Joins("join product_images on product_images.id = product_image.product_image_id").Joins("join shop_shipping_vendors on shop_shipping_vendors.shop_id = shops.id").Joins("join shipping_vendors on shop_shipping_vendors.vendor_id = shipping_vendors.id")
@@ -165,7 +165,7 @@ func (r *queryResolver) GetProductsSearch(ctx context.Context, search string, so
 		temp = temp.Order("price asc")
 	}
 
-	temp.Find(&products).Preload("Images")
+	temp.Offset(offset).Limit(limit).Find(&products).Preload("Images")
 	return products, nil
 }
 
